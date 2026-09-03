@@ -1,0 +1,29 @@
+[package]
+name = "app-core"
+description = "Domain logic for the example application. No I/O, no CLI, no framework."
+
+# Every field that can be inherited is inherited. A new crate copies these six
+# lines and immediately agrees with the rest of the workspace.
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+# One line, and this crate is held to exactly the same lints as every other.
+[lints]
+workspace = true
+
+[dependencies]
+# `workspace = true` means "the version the workspace decided on". There is no
+# version number here to drift out of sync with the one next door.
+serde.workspace = true
+thiserror.workspace = true
+
+# `harness = false` because this repo does not depend on criterion or divan.
+# The stock libtest bench harness needs `#[bench]`, which is nightly-only.
+# A real project picks a harness crate; see benches/README.md.
+[[bench]]
+name = "order-total"
+harness = false
