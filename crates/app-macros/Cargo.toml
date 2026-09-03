@@ -1,0 +1,24 @@
+[package]
+name = "app-macros"
+description = "Procedural macros for the example application."
+
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+# This is the one crate split the *language* forces on you. A crate with
+# `proc-macro = true` is compiled for the host and loaded into the compiler; it
+# cannot export ordinary items, and nothing else in the package can either.
+# There is no way to keep these macros in `app-core`.
+[lib]
+proc-macro = true
+
+[lints]
+workspace = true
+
+# Deliberately empty. A real proc-macro crate depends on syn + quote +
+# proc-macro2; see src/lib.rs for why this one does not.
+[dependencies]
