@@ -1,0 +1,64 @@
+PLACEHOLDER — replace this file before publishing anything.
+
+===============================================================================
+The Rust convention: dual MIT OR Apache-2.0
+===============================================================================
+
+The overwhelming majority of the Rust ecosystem, including the compiler and the
+standard library, is licensed:
+
+    MIT OR Apache-2.0
+
+The `OR` is a genuine choice offered to the user, not a requirement to comply
+with both. It is SPDX syntax, and it is what belongs in `Cargo.toml`:
+
+    [workspace.package]
+    license = "MIT OR Apache-2.0"
+
+Why both, rather than either alone:
+
+  * Apache-2.0 includes an express patent grant. MIT does not, which leaves
+    patent rights to be inferred, and some corporate legal reviews will not
+    accept that.
+
+  * Apache-2.0 is incompatible with GPLv2. MIT is not. Offering both means a
+    GPLv2 project can use your crate under MIT while a company that requires a
+    patent grant can use it under Apache-2.0.
+
+  * Because it is what the ecosystem already does, `cargo deny`'s allow-lists,
+    corporate approval processes and licence scanners are all configured for
+    it. Choosing something else means every downstream consumer has a
+    conversation about you.
+
+===============================================================================
+What to do instead of shipping this file
+===============================================================================
+
+Convention is two files at the repository root, both referenced from the
+README:
+
+    LICENSE-MIT          the MIT licence text
+    LICENSE-APACHE       the Apache License 2.0 text
+
+Get the texts from https://spdx.org/licenses/ or from any established Rust
+project. Do not retype them; the text is the licence.
+
+Then add the standard contribution notice to CONTRIBUTING.md — see the
+"Licence" section there.
+
+If you keep a single `LICENSE` file instead, make sure it holds the actual
+licence text and that `license` in `Cargo.toml` matches it. A `license` field
+that disagrees with the file in the repository is worse than either alone.
+
+Other reasonable choices, and when:
+
+  * MIT alone            — maximum simplicity, no patent grant
+  * Apache-2.0 alone     — patent grant, GPLv2-incompatible
+  * MPL-2.0              — file-level copyleft
+  * AGPL-3.0 / GPL-3.0   — strong copyleft; expect near-zero adoption as a
+                           library, since it propagates to every consumer
+  * Proprietary          — set `publish = false` in every `[package]` and use
+                           `license-file` or an explicit SPDX expression
+
+Whatever you pick, say so in `Cargo.toml`. An unlicensed crate is legally
+unusable by everyone, including the people you wanted to use it.
