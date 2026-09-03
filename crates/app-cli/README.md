@@ -37,9 +37,6 @@ way out is stdout, stderr and an exit code. Compare that to the unit tests in
 So: `main.rs` is four lines, [`cli.rs`](src/cli.rs) turns strings into domain
 types, and every rule lives in `app-core`.
 
-The same instinct produces Go's thin `cmd/foo/main.go`. Rust expresses it as
-`src/bin/` or a dedicated `-cli` crate rather than a `cmd/` directory.
-
 ## `anyhow`, not `thiserror`
 
 Nothing downstream will ever match on an error out of this crate; the only

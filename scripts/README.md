@@ -12,8 +12,8 @@ task in `xtask`, express it there.
 - **Bootstrapping**, which by definition runs before `cargo` is available.
 - **Glue for a tool that is already a CLI** and needs three lines to invoke.
 - **Environment-specific one-offs** that would be noise in `xtask`.
-- **Git hooks** (`golang-standards/project-layout` gives these their own
-  `githooks/` directory; there is no reason to).
+- **Git hooks.** Some layouts give these a top-level `githooks/` directory;
+  there is no reason to.
 
 ## If you write one anyway
 

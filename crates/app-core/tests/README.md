@@ -11,8 +11,8 @@ Unit tests do not live here. They live in `#[cfg(test)] mod tests` beside the
 code they test, where they can see private state. See
 [`../src/domain/order.rs`](../src/domain/order.rs).
 
-There is no mirrored `test/` tree in Rust. Go's `/test` directory has no
-equivalent, because Cargo already owns both halves of the problem.
+There is no mirrored `test/` tree in Rust, and no reason to build one: Cargo
+already owns both halves of the problem.
 
 ## File naming
 

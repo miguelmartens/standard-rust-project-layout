@@ -34,8 +34,8 @@ the list of `pub use` statements below them. Callers write `app_core::Order`,
 never `app_core::domain::order::Order`. The internal module tree is therefore
 not part of the API, and can be reorganised without a major version bump.
 
-This is also the answer to Go's `internal/`: privacy is a language feature the
-compiler enforces, not a directory name a linter enforces.
+It is also why no directory here means "private": privacy is a language feature
+the compiler enforces, not a directory name a linter enforces.
 
 **Unit tests and integration tests are not the same test.**
 

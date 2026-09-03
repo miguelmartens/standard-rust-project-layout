@@ -21,9 +21,10 @@
 //! refactor, not a breaking change, because no downstream `use` statement
 //! mentions it.
 //!
-//! This is also why Rust has no need for Go's `internal/` directory. Privacy is
-//! a language feature the compiler enforces; a directory name is a convention a
-//! linter has to enforce. See the README section "Coming from Go".
+//! It is also why no directory in this repository means "private". Privacy is a
+//! language feature the compiler enforces, per item and wherever the item sits
+//! on disk; a directory name is a convention a linter has to enforce. See the
+//! README section "Privacy is a language feature".
 //!
 //! [`app-cli`]: https://github.com/example/rust-project-layout
 //!

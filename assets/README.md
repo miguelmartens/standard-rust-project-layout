@@ -27,10 +27,11 @@ platform directory crate rather than guessing relative to the executable.
 at compile time. Write output to `OUT_DIR` and `include!` it; never write into
 `src/`.
 
-## Where the Go layout's directories land
+## Neighbouring directories
 
-`web/`, `configs/`, `init/` and `api/` from `golang-standards/project-layout`
-all fall in here or next to it. None of them has a Rust equivalent, because none
-of them is a language concern.
+Static web files, configuration templates, service definitions and API schemas
+all land here or in a sibling directory of your choosing. None of them has a Rust
+convention, because none of them is a language concern — see "Directories the
+ecosystem has no convention for" in the top-level README.
 
 Delete this directory if the project has no assets.

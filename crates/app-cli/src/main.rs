@@ -11,10 +11,6 @@
 //! decide the exit code — and hands off immediately. The rules live in
 //! `app-core`, where they can be unit tested in microseconds.
 //!
-//! The Go habit of a thin `cmd/foo/main.go` is exactly the same instinct. Rust
-//! just expresses it as `src/bin/` or a dedicated `-cli` crate rather than a
-//! `cmd/` directory.
-//!
 //! # Returning `Result` from `main`
 //!
 //! `fn main() -> anyhow::Result<()>` makes the runtime print the error chain to

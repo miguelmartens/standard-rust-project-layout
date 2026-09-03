@@ -17,8 +17,8 @@ have to agree. Left to individual manifests they drift, and the first symptom is
 usually two incompatible versions of the same type in one binary, reported as a
 type error that names the same type twice.
 
-We also want a reader arriving from `golang-standards/project-layout` to find a
-structure they can navigate without reading Cargo's documentation first.
+We also want a reader who has never used a Cargo workspace to find a structure
+they can navigate without reading Cargo's documentation first.
 
 ## Decision
 
