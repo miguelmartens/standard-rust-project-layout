@@ -1,0 +1,10 @@
+# Pins the toolchain for everyone: contributors, CI, and editors all get the
+# same rustc, the same rustfmt formatting, and the same clippy lint set.
+# rustup reads this file automatically -- no `rustup override` needed.
+#
+# CI does NOT restate the version. Pinning it in two places is how the two
+# drift apart.
+
+[toolchain]
+channel = "stable"
+components = ["rustfmt", "clippy"]

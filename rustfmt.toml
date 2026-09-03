@@ -1,0 +1,12 @@
+# Deliberately almost empty.
+#
+# rustfmt's defaults ARE the Rust style guide. Every option added here is a
+# small, permanent tax on every reader who has internalised the default output.
+# `max_width` is the one setting worth having an opinion about, and even that
+# is arguable.
+#
+# Anything below this line requires nightly and does not belong in a repo that
+# claims to build on stable.
+
+edition = "2024"
+max_width = 100

@@ -1,0 +1,91 @@
+# Virtual manifest: a `[workspace]` with no `[package]`.
+#
+# "Alternatively, a `Cargo.toml` file can be created with a `[workspace]` section
+#  but without a `[package]` section. This is called a virtual manifest."
+#   -- https://doc.rust-lang.org/cargo/reference/workspaces.html
+#
+# A virtual manifest is the right shape when there is no single "primary" crate.
+# The root is pure configuration; every crate lives in `crates/`.
+
+[workspace]
+# "`resolver` must be set explicitly in virtual workspaces as they have no
+#  `package.edition` to infer it from."
+# Resolver 3 is the MSRV-aware resolver: it will not pick a dependency version
+# that requires a newer rustc than `workspace.package.rust-version` below.
+resolver = "3"
+
+members = [
+    "crates/app-cli",
+    "crates/app-core",
+    "crates/app-macros",
+    "xtask",
+]
+
+# -----------------------------------------------------------------------------
+# Shared package metadata. Members opt in field by field with `field.workspace = true`.
+# M-CARGO-WORKSPACE: "Common settings come from the workspace Cargo.toml".
+# -----------------------------------------------------------------------------
+[workspace.package]
+version = "0.1.0"
+# M-LATEST-EDITION: new crates target the latest stable edition.
+edition = "2024"
+# M-MSRV: pin an MSRV from day one, a few releases behind stable.
+# 1.85 is the floor for edition 2024, so it is the earliest honest value here.
+rust-version = "1.85"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/rust-project-layout"
+authors = ["The rust-project-layout authors"]
+
+# -----------------------------------------------------------------------------
+# One canonical version per dependency, for the whole workspace.
+#
+# M-CRATES-IN-WORKSPACE: every crate this repo produces is listed here with both
+# `path` and `version`. `path` is what a local build uses; `version` is what a
+# published crate records for its consumers. Omitting `version` makes the crate
+# unpublishable; omitting `path` makes local development use crates.io.
+# -----------------------------------------------------------------------------
+[workspace.dependencies]
+app-core = { path = "crates/app-core", version = "0.1.0" }
+app-macros = { path = "crates/app-macros", version = "0.1.0" }
+
+anyhow = "1.0.104"
+clap = { version = "4.6.6", features = ["derive"] }
+serde = { version = "1.0.229", features = ["derive"] }
+thiserror = "2.0.20"
+
+# -----------------------------------------------------------------------------
+# Lints live here, not as `#![deny(...)]` in every crate root.
+# Members opt in with `[lints] workspace = true`, which is one line per crate
+# instead of a block that drifts out of sync.
+# -----------------------------------------------------------------------------
+[workspace.lints.rust]
+# `forbid` cannot be lifted by a local `#[allow]`. If a crate genuinely needs
+# `unsafe`, it says so by overriding this in its own manifest -- visibly, in review.
+unsafe_code = "forbid"
+missing_debug_implementations = "warn"
+# Catches `pub` on items that are not actually reachable from outside the crate:
+# a strong signal that the intended visibility was `pub(crate)`.
+unreachable_pub = "warn"
+
+[workspace.lints.clippy]
+# "priority is a signed integer that controls which lints or lint groups override
+#  other lint groups: lower (particularly negative) numbers have lower priority."
+# Groups get priority -1 so the individual lints below can override members of them.
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+unwrap_used = "warn"
+expect_used = "warn"
+todo = "warn"
+
+# -----------------------------------------------------------------------------
+# Profiles. Only recognised in the workspace root manifest.
+# -----------------------------------------------------------------------------
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+
+# `bench` inherits from `release`. Turning debug info back on costs nothing at
+# runtime and lets a profiler attribute samples to source lines.
+[profile.bench]
+debug = true

@@ -1,0 +1,16 @@
+# Cargo's build output. Shared by the whole workspace, so one entry covers it.
+/target
+
+# Old rustfmt backups.
+**/*.rs.bk
+
+# Editors and OS junk.
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# NOTE: Cargo.lock is deliberately NOT ignored.
+# It is committed for binaries and libraries alike -- see the README section
+# "Commit Cargo.lock". If you copy this file into a library and add an ignore
+# rule for Cargo.lock, you are giving up reproducible CI for nothing.

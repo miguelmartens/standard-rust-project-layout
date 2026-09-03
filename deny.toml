@@ -1,0 +1,53 @@
+# cargo-deny: the checks a `Cargo.toml` review cannot do by eye.
+#
+# Install with `cargo install --locked cargo-deny`, run with `cargo deny check`.
+# CI runs it on a schedule as well as on every PR, because a new advisory can
+# make a green commit red without anyone touching the repository.
+#
+# Reference: https://embarkstudios.github.io/cargo-deny/checks/cfg.html
+
+[graph]
+# Evaluate every optional feature, so a dependency that only appears behind a
+# feature flag is still checked.
+all-features = true
+
+# --- advisories: is anything we depend on known to be broken? ----------------
+[advisories]
+# Advisories to consciously accept, each with an issue link and an expiry.
+# An empty list is the only acceptable steady state.
+ignore = []
+
+# --- licences: may we legally ship this? -------------------------------------
+[licenses]
+# An allow-list, not a deny-list. A dependency with an unrecognised licence
+# should stop the build and get a human decision, not slip through.
+allow = [
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "MIT",
+    "MIT-0",
+    "Unicode-3.0",
+    "Zlib",
+]
+# How certain the text-matching has to be before a licence counts as identified.
+confidence-threshold = 0.93
+
+# --- bans: dependency hygiene ------------------------------------------------
+[bans]
+# Two versions of the same crate in one binary is a size and correctness smell,
+# but it is routine mid-ecosystem-upgrade. Warn, do not fail.
+multiple-versions = "warn"
+# `foo = "*"` opts out of semver. Never acceptable.
+wildcards = "deny"
+# Crates that must never appear, with a reason. Example:
+#     deny = [{ crate = "openssl", reason = "use rustls" }]
+deny = []
+
+# --- sources: where did this code come from? ---------------------------------
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]

@@ -1,0 +1,20 @@
+# Thresholds and knobs only.
+#
+# WHICH lints are enabled is a Cargo concern and lives in `[workspace.lints]`
+# in the root `Cargo.toml`, so it is inherited by every crate. This file cannot
+# enable or disable a lint; it only tunes the ones that take parameters.
+#
+# Note: clippy reads the MSRV from `package.rust-version`, so there is
+# deliberately no `msrv` key here. Setting it in both places is how they drift.
+
+# Refuse to silently break a published API when suggesting a fix.
+avoid-breaking-exported-api = true
+
+# Five positional arguments is where a struct becomes the better answer.
+too-many-arguments-threshold = 5
+type-complexity-threshold = 250
+cognitive-complexity-threshold = 20
+
+# Identifiers clippy's `doc_markdown` lint should not demand backticks around.
+# `".."` means "in addition to the built-in list", not "instead of it".
+doc-valid-idents = ["..", "OpenAPI", "MSRV", "SemVer", "TOML", "YAML"]

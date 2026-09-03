@@ -1,0 +1,8 @@
+# The whole cargo-xtask pattern is this one alias.
+#
+# `cargo xtask ci` becomes `cargo run --package xtask -- ci`. Contributors get a
+# discoverable, cargo-native entry point for automation, and the automation
+# itself is ordinary Rust in `xtask/`.
+
+[alias]
+xtask = "run --package xtask --"
