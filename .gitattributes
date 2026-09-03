@@ -1,0 +1,58 @@
+# Line endings are LF. Not "should be" -- are.
+#
+# .editorconfig asks editors nicely; this file makes git enforce it. That is the
+# difference between a convention and a guarantee: `text=auto eol=lf` normalises
+# to LF in the index *and* checks out LF on Windows, so a contributor with
+# core.autocrlf=true cannot commit CRLF by accident.
+#
+# Why this matters in a Rust repository specifically: rustfmt does not normalise
+# line endings. A CRLF file passes `cargo fmt --check` on the machine that wrote
+# it and then shows up as a whole-file diff for the next person. Three files
+# (.editorconfig, .gitattributes, .prettierrc) agree on LF so that never happens.
+
+* text=auto eol=lf
+
+# --- Diff drivers ------------------------------------------------------------
+# `diff=rust` is a git built-in: hunk headers show the enclosing `fn` or `impl`
+# instead of a bare line number, which makes every `git diff` and every review
+# slightly easier to read. Free, and almost nobody turns it on.
+#
+# There is no built-in driver for TOML, so Cargo.toml diffs stay generic.
+*.rs   diff=rust
+*.md   diff=markdown
+
+# --- The exceptions to LF ----------------------------------------------------
+# Batch and PowerShell interpreters can genuinely misbehave on LF-only files.
+# These are the only files in a repository that should ever contain CRLF.
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+*.ps1  text eol=crlf
+
+# --- Generated, but committed ------------------------------------------------
+# Cargo.lock is committed on purpose (see the README) and reviewed by nobody.
+# `linguist-generated` collapses it by default in GitHub pull request diffs and
+# keeps it out of the repository's language statistics. It does not hide the
+# file from `git diff`, and it does not stop you reviewing it when you want to.
+Cargo.lock text eol=lf linguist-generated=true
+
+# --- Binary: never normalise, never diff -------------------------------------
+# Without these, `text=auto` guesses. It guesses well, but a false positive
+# corrupts the file, and the corruption is committed before anyone notices.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.webp binary
+*.pdf  binary
+*.woff binary
+*.woff2 binary
+*.zip  binary
+*.gz   binary
+*.wasm binary
+
+# --- Note on `export-ignore` -------------------------------------------------
+# `path/ export-ignore` omits a path from `git archive` tarballs. Deliberately
+# not used here: it affects only `git archive`, NOT `cargo package`, which uses
+# the `include`/`exclude` keys in Cargo.toml. Setting it and assuming crates.io
+# honours it is a common and quiet mistake.
