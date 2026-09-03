@@ -1,0 +1,99 @@
+# The same checks `cargo xtask ci` runs locally, split into jobs so a failure
+# names itself in the PR checks list.
+#
+# The toolchain version appears nowhere in this file. `rust-toolchain.toml` is
+# the single source of truth and rustup honours it automatically; the MSRV job
+# reads its version out of `Cargo.toml`. Pinning a version here as well is how
+# the two quietly diverge.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # Weekly, so a yanked crate or a fresh advisory surfaces in a scheduled run
+  # rather than in an unrelated pull request on a Friday afternoon.
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  # Fail rather than silently rebuild if `Cargo.lock` is out of date. This is
+  # only meaningful because the lockfile is committed.
+  CARGO_NET_RETRY: 3
+
+jobs:
+  check:
+    name: fmt, clippy, test, doc
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # No toolchain action: rustup ships on the runner and installs the
+      # channel and components named in rust-toolchain.toml on first use.
+      - name: Show toolchain
+        run: rustc --version && cargo --version && cargo clippy --version
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Formatting
+        run: cargo fmt --all --check
+
+      # --all-targets so lints in tests, examples and benches count too.
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+
+      - name: Tests
+        run: cargo test --workspace --all-targets --locked
+
+      # Separate step on purpose: --all-targets does NOT run doctests, so a
+      # single `cargo test --all-targets` silently skips every example in every
+      # doc comment.
+      - name: Doctests
+        run: cargo test --workspace --doc --locked
+
+      - name: Documentation
+        env:
+          RUSTDOCFLAGS: -D warnings
+        run: cargo doc --workspace --no-deps --all-features --locked
+
+  msrv:
+    name: minimum supported rust version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # The MSRV is declared once, in [workspace.package].rust-version.
+      # Reading it here means bumping it is a one-line change.
+      - name: Read MSRV from Cargo.toml
+        id: msrv
+        run: |
+          version="$(grep -m1 '^rust-version' Cargo.toml | cut -d'"' -f2)"
+          echo "Declared MSRV: ${version}"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
+      - name: Install the MSRV toolchain
+        run: rustup toolchain install "${{ steps.msrv.outputs.version }}" --profile minimal --no-self-update
+
+      - uses: Swatinem/rust-cache@v2
+
+      # `check`, not `test`: this job answers "does it compile on the oldest
+      # supported compiler", not "does it pass". `--locked` matters here --
+      # resolver 3 picked MSRV-compatible dependency versions when the lockfile
+      # was written, and re-resolving would undo that.
+      - name: Check
+        run: cargo +${{ steps.msrv.outputs.version }} check --workspace --all-targets --locked
+
+  deny:
+    name: licences and advisories
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check advisories bans licenses sources

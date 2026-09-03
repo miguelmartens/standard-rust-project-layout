@@ -1,0 +1,29 @@
+# NOTE ON THE FILE EXTENSION
+# GitHub documents this file as `.github/dependabot.yml` and matches that name.
+# Unlike workflow files, which accept `.yaml` too, this one is not worth
+# gambling on: a misnamed Dependabot config fails silently -- no error, just no
+# updates. Hence `.yml` here and `.yaml` everywhere else in this repository.
+version: 2
+
+updates:
+  # Cargo reads the workspace root; one entry covers every member crate.
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly
+    # One pull request for all routine bumps instead of fifteen. Major bumps
+    # stay separate, because those are the ones worth reading.
+    groups:
+      cargo-minor-and-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+    open-pull-requests-limit: 5
+
+  # Pinned action versions rot in exactly the same way dependencies do.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns: ["*"]
