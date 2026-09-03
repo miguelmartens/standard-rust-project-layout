@@ -699,15 +699,16 @@ Everything below this line: **Rust has no convention, and neither does this
 document beyond "pick one and be consistent".** Cargo does not know these
 directories exist. Common choices, with a defensible default in bold:
 
-| Purpose          | Common names                                            | Notes                                                                           |
-| ---------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Long-form docs   | **`docs/`**, `doc/`, `book/`                            | `cargo doc` is the API reference; this is what does not fit in a `///` comment. |
-| Decision records | **`docs/adr/`**, `docs/decisions/`, `rfcs/`             | [`docs/adr/`](docs/adr/) has a template and a worked example.                   |
-| Deployment       | **`deploy/`**, `deployments/`, `infra/`, `ops/`, `k8s/` | Dockerfiles, manifests, Terraform.                                              |
-| Static files     | **`assets/`**, `resources/`, `static/`, `data/`         | Must stay _outside_ `src/`, which Cargo compiles.                               |
-| Shell scripts    | **`scripts/`**                                          | Prefer `xtask`. See [`scripts/README.md`](scripts/README.md).                   |
-| Schemas          | **`proto/`**, `openapi/`, `schemas/`                    | Whatever the code generator expects.                                            |
-| Migrations       | **`migrations/`**                                       | Set by your ORM (`sqlx`, `diesel`), not by you.                                 |
+| Purpose          | Common names                                            | Notes                                                                                                        |
+| ---------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Long-form docs   | **`docs/`**, `doc/`, `book/`                            | `cargo doc` is the API reference; this is what does not fit in a `///` comment.                              |
+| Decision records | **`docs/adr/`**, `docs/decisions/`, `rfcs/`             | [`docs/adr/`](docs/adr/) has a template and a worked example.                                                |
+| Deployment       | **`deploy/`**, `deployments/`, `infra/`, `ops/`, `k8s/` | Dockerfiles, manifests, Terraform.                                                                           |
+| Static files     | **`assets/`**, `resources/`, `static/`, `data/`         | Must stay _outside_ `src/`, which Cargo compiles.                                                            |
+| Agent notes      | **`AGENTS.md`**                                         | [agents.md](https://agents.md), a 2025 convention most agents now read. Nested files override per directory. |
+| Shell scripts    | **`scripts/`**                                          | Prefer `xtask`. See [`scripts/README.md`](scripts/README.md).                                                |
+| Schemas          | **`proto/`**, `openapi/`, `schemas/`                    | Whatever the code generator expects.                                                                         |
+| Migrations       | **`migrations/`**                                       | Set by your ORM (`sqlx`, `diesel`), not by you.                                                              |
 
 **Delete the ones you do not use.** An empty `deploy/` containing only a README
 is worse than no `deploy/`: it implies a deployment story exists and sends
@@ -795,6 +796,7 @@ one source of confusion.
 ├── .prettierrc                    # Markdown/YAML/JSON — what rustfmt misses
 ├── .prettierignore
 ├── Makefile                       # aliases for `cargo xtask` — no logic in it
+├── AGENTS.md                      # the same rules, aimed at coding agents
 ├── README.md                      # you are here
 ├── CONTRIBUTING.md
 ├── CHANGELOG.md
