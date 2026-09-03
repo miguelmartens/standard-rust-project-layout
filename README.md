@@ -776,6 +776,7 @@ one source of confusion.
 ├── deny.toml                      # cargo-deny: advisories, licences, bans, sources
 ├── .cargo/config.toml             # [alias] xtask = "run --package xtask --"
 ├── .editorconfig                  # editors: LF, indent width
+├── .pre-commit-config.yaml        # optional local hooks — not used by CI
 ├── .gitattributes                 # git: LF enforced, plus diff=rust
 ├── .gitignore                     # note what is NOT ignored
 ├── .prettierrc                    # Markdown/YAML/JSON — what rustfmt misses

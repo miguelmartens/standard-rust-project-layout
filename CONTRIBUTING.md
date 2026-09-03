@@ -15,6 +15,18 @@ channel and pulls in `rustfmt` and `clippy`, and rustup honours it on the first
 You need `rustup`. You do not need `make`, `just`, or a shell that understands
 `set -euo pipefail`.
 
+Two optional extras, neither of which anything in CI depends on:
+
+```console
+$ cargo xtask hooks   # install the git hooks (needs pre-commit)
+```
+
+[`.pre-commit-config.yaml`](.pre-commit-config.yaml) formats and sanity-checks
+staged files on commit, and runs clippy and the tests on push. It exists purely
+to save you a CI round trip; every expensive hook in it runs a command CI runs
+anyway, so skipping it costs you latency and nothing else. Install `pre-commit`
+with `uv tool install pre-commit` or `brew install pre-commit`.
+
 Node is **optional**. Prettier formats the Markdown, YAML and JSON that rustfmt
 does not touch; `cargo xtask fmt` runs it when it is on `PATH` and prints a skip
 notice when it is not, so you are never blocked on it. CI always runs it, so a

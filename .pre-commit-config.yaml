@@ -1,0 +1,109 @@
+# Local pre-flight checks. https://pre-commit.com
+#
+#     uv tool install pre-commit     # or: brew install pre-commit
+#     pre-commit install             # or: make hooks
+#
+# Optional, like Prettier. `rustup` stays the only hard requirement for working
+# on this repository, and nothing in CI depends on this file.
+#
+# WHY THIS IS NOT IN CI
+#
+# Every expensive hook below runs a command CI already runs directly, so wiring
+# `pre-commit run --all-files` into the pipeline would double the work and give
+# the hooks a second, quieter place to disagree with it. The point of this file
+# is latency: catching a missing newline locally costs three seconds, and
+# catching it in CI costs a five-minute round trip and a force-push.
+#
+# If you do want it enforced, https://pre-commit.ci runs and auto-fixes this
+# config on pull requests for free, and is the usual answer.
+#
+# TWO STAGES, ON PURPOSE
+#
+# Anything that runs on every commit has to be fast, or people uninstall it.
+# Formatting and file hygiene run at `pre-commit`; clippy and the test suite are
+# held back to `pre-push`, where a few seconds is affordable and being wrong is
+# expensive.
+#
+# Note that a few of the upstream hygiene hooks declare their own `stages` and so
+# run at both -- `default_stages` only supplies a default for hooks that do not
+# set one. They take milliseconds, so it is not worth overriding.
+
+default_install_hook_types: [pre-commit, pre-push]
+default_stages: [pre-commit]
+
+repos:
+  # --- File hygiene: the things no formatter owns -----------------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: check-case-conflict # a repo that breaks on macOS and Windows
+      - id: detect-private-key
+      - id: check-toml # Cargo.toml, clippy.toml, deny.toml, rustfmt.toml
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        # Two trailing spaces are a hard line break in Markdown, which is why
+        # .editorconfig sets trim_trailing_whitespace = false for *.md. This flag
+        # is the same exemption, so the two files agree instead of fighting.
+        args: [--markdown-linebreak-ext=md]
+      - id: mixed-line-ending
+        args: [--fix=lf]
+        # Not redundant with .gitattributes, despite appearances: that file
+        # normalises what git *stores*, this one normalises the file *on disk* --
+        # which is what your editor, rustfmt and every grep actually see.
+
+  # --- Rust ------------------------------------------------------------------
+  #
+  # `language: system` on purpose: these run the cargo on your PATH, which
+  # rust-toolchain.toml has already pinned. A vendored toolchain here would be a
+  # second version to keep in step with that file, and the first place the two
+  # would disagree is in a formatting diff nobody can reproduce.
+  #
+  # `pass_filenames: false` because cargo operates on the workspace, not on the
+  # list of files you happen to have staged.
+  - repo: local
+    hooks:
+      - id: cargo-fmt
+        name: cargo fmt
+        entry: cargo fmt --all
+        language: system
+        types: [rust]
+        pass_filenames: false
+
+      # Pre-push. Roughly a second on a warm cache and far longer on a cold one,
+      # which is exactly the cost you want paid before a push rather than during
+      # someone else's review.
+      - id: cargo-clippy
+        name: cargo clippy
+        entry: cargo clippy --workspace --all-targets --all-features -- -D warnings
+        language: system
+        types: [rust]
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: cargo-test
+        name: cargo test
+        entry: cargo test --workspace --all-targets
+        language: system
+        types: [rust]
+        pass_filenames: false
+        stages: [pre-push]
+
+  # --- Everything rustfmt does not touch -------------------------------------
+  #
+  # A local hook rather than a mirror repo: pre-commit/mirrors-prettier is
+  # archived, and pinning the version here keeps it next to the `prettier@3` in
+  # .github/workflows/ci.yaml instead of buried in a third-party tag.
+  #
+  # `language: node` makes pre-commit build its own cached node environment, so
+  # this hook works without Node installed and without touching a global one.
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier
+        entry: prettier --write
+        language: node
+        additional_dependencies: ["prettier@3"]
+        types_or: [markdown, yaml, json]

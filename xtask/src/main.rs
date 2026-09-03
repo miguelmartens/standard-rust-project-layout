@@ -62,6 +62,7 @@ TASKS:
     fmt     format in place: rustfmt, then prettier if it is installed
     lint    clippy over every target, warnings denied
     test    tests and doctests
+    hooks   install the git hooks from .pre-commit-config.yaml
     help    print this message
 ";
 
@@ -73,6 +74,7 @@ fn main() -> ExitCode {
         Some("fmt") => fmt(),
         Some("lint") => lint(),
         Some("test") => test(),
+        Some("hooks") => hooks(),
         Some("help" | "--help" | "-h") | None => {
             print!("{HELP}");
             return ExitCode::SUCCESS;
@@ -115,6 +117,32 @@ fn fmt_check() -> Result<(), DynError> {
 enum Mode {
     Check,
     Write,
+}
+
+/// Installs the git hooks described by `.pre-commit-config.yaml`.
+///
+/// Optional, on the same terms as Prettier: a missing `pre-commit` is a printed
+/// note, not a failure. The hooks are a local latency optimisation -- catching a
+/// missing newline in three seconds instead of a five-minute CI round trip --
+/// and nothing in CI depends on them.
+fn hooks() -> Result<(), DynError> {
+    let Some(program) = which("pre-commit") else {
+        eprintln!("note: pre-commit not found, skipping hook installation.");
+        eprintln!("note: `uv tool install pre-commit` or `brew install pre-commit`, then re-run.");
+        return Ok(());
+    };
+
+    eprintln!("$ pre-commit install");
+    let status = Command::new(program)
+        .current_dir(workspace_root()?)
+        .arg("install")
+        .status()?;
+
+    if status.success() {
+        Ok(())
+    } else {
+        Err(format!("`pre-commit install` failed: {status}").into())
+    }
 }
 
 /// Runs Prettier over the files rustfmt does not touch: Markdown, YAML, JSON.

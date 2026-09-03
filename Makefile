@@ -21,7 +21,7 @@
 # `test` in the repository root would silently stop `make test` from running --
 # make would decide the target was already up to date and do nothing. This is
 # the single most common Makefile bug and it fails quietly.
-.PHONY: help ci fmt lint test build doc clean
+.PHONY: help ci fmt lint test hooks build doc clean
 
 MAKEFLAGS += --no-print-directory
 
@@ -40,6 +40,9 @@ lint: ## Clippy over every target, warnings denied
 
 test: ## Tests, then doctests
 	cargo xtask test
+
+hooks: ## Install the git hooks (optional; needs pre-commit)
+	cargo xtask hooks
 
 build: ## Debug build of the whole workspace
 	cargo build --workspace
