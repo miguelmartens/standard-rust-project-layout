@@ -3,15 +3,15 @@
 Every crate this repository produces, as **flat siblings**. One directory per
 crate, no nesting.
 
-| Crate | Kind | Why it is separate |
-|---|---|---|
-| [`app-core`](app-core/) | library | Domain logic with no I/O. Reusable from something other than the CLI; testable without a process. |
-| [`app-cli`](app-cli/) | binary | Parses `argv`, wires things together, picks an exit code. |
-| [`app-macros`](app-macros/) | proc-macro | The language forces this one. A `proc-macro = true` crate can export nothing else. |
+| Crate                       | Kind       | Why it is separate                                                                                |
+| --------------------------- | ---------- | ------------------------------------------------------------------------------------------------- |
+| [`app-core`](app-core/)     | library    | Domain logic with no I/O. Reusable from something other than the CLI; testable without a process. |
+| [`app-cli`](app-cli/)       | binary     | Parses `argv`, wires things together, picks an exit code.                                         |
+| [`app-macros`](app-macros/) | proc-macro | The language forces this one. A `proc-macro = true` crate can export nothing else.                |
 
 ## The rules this directory follows
 
-**Flat, always.** *M-CRATES-FLAT-FOLDER*: "All crates are siblings in one
+**Flat, always.** _M-CRATES-FLAT-FOLDER_: "All crates are siblings in one
 folder." A crate nested inside another crate's directory — and especially inside
 its `src/` — is never acceptable. Cargo will not find it, `cargo build` will not
 build it, and readers will not expect it.
@@ -27,7 +27,7 @@ There is no `app/core/` directory and there should not be.
 
 **Every crate is a workspace member.** Listed in `[workspace] members`, and
 listed again in `[workspace.dependencies]` with both `path` and `version`.
-*M-CRATES-IN-WORKSPACE*. Siblings then depend on each other with
+_M-CRATES-IN-WORKSPACE_. Siblings then depend on each other with
 `app-core.workspace = true` — never `app-core = { path = "../app-core" }`, which
 reintroduces exactly the version skew the workspace exists to prevent, and
 produces a crate that cannot be published.

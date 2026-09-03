@@ -17,7 +17,7 @@ equivalent, because Cargo already owns both halves of the problem.
 ## File naming
 
 Target names are kebab-case: `order-lifecycle.rs` gives
-`cargo test --test order-lifecycle`. Rust *modules* are `snake_case` (RFC 430),
+`cargo test --test order-lifecycle`. Rust _modules_ are `snake_case` (RFC 430),
 but these files are crate roots, not modules.
 
 ## Shared helper code

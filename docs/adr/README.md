@@ -3,14 +3,14 @@
 Short documents recording a decision, its context, and its consequences —
 written when the decision is made, never edited afterwards.
 
-The value is entirely in the *why*. Six months from now the code will show what
+The value is entirely in the _why_. Six months from now the code will show what
 was decided; nothing except an ADR will show what the alternatives were and why
 they lost. That is the question that actually blocks people.
 
 ## Conventions
 
 - One file per decision, numbered and never renumbered: `NNNN-kebab-case-title.md`.
-- **ADRs are immutable.** A decision that changes gets a *new* ADR that
+- **ADRs are immutable.** A decision that changes gets a _new_ ADR that
   supersedes the old one, and the old one gets a line at the top pointing at it.
   Editing history to look consistent destroys the only thing this directory is
   for.

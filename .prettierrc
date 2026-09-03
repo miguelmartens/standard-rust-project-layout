@@ -1,0 +1,61 @@
+# Formatting for the files rustfmt does not touch.
+#
+# Division of labour in this repository:
+#
+#   *.rs             rustfmt      rustfmt.toml, enforced by `cargo fmt --check`
+#   *.md *.yaml      Prettier     this file
+#   *.json           Prettier     this file
+#   *.toml           nobody       Prettier has no TOML parser; use taplo if you
+#                                 want one. Cargo does not care either way.
+#
+# Prettier is OPTIONAL for contributors. `cargo xtask fmt` and `cargo xtask ci`
+# run it when npx is on PATH and print a skip notice when it is not, so `rustup`
+# stays the only hard requirement for working on this repository. CI always has
+# Node, so CI always runs it -- a config that nothing enforces drifts.
+#
+# ---------------------------------------------------------------------------
+# WHY THIS FILE IS YAML AND NOT JSON
+#
+# Prettier reads `.prettierrc` as JSON *or* YAML, and the failure mode of
+# guessing wrong is nasty: JSON-with-comments does not error, it parses as YAML,
+# turns the comment into a key, silently ignores every option after it, and
+# exits 0. Verified with Prettier 3.9.6:
+#
+#     {                              ->  Ignored unknown option
+#       // printWidth is 40                { "// printWidth is 40": 40 }
+#       "printWidth": 40             ->  and printWidth was never applied
+#     }
+#
+# YAML has real comments, so this file can explain itself the way every other
+# config file here does. If you prefer JSON, drop the comments entirely --
+# do not keep them.
+# ---------------------------------------------------------------------------
+
+# Match rustfmt's max_width, so a code block that fits inside a .rs file also
+# fits inside the Markdown that quotes it.
+printWidth: 100
+
+# Do NOT reflow prose. With `always`, changing a single word rewraps the whole
+# paragraph and the diff becomes unreadable -- the reviewer cannot see which
+# sentence changed. The Markdown here is hand-wrapped at ~80 for that reason,
+# and `preserve` leaves it alone.
+proseWrap: preserve
+
+# Redundant three times over (.gitattributes enforces it, .editorconfig declares
+# it, and Prettier 3 reads .editorconfig by default). Stated anyway, because
+# this file takes precedence where they disagree -- so it had better agree.
+endOfLine: lf
+
+tabWidth: 2
+singleQuote: false
+
+overrides:
+  # GitHub Actions workflows are the one place in this repository where YAML
+  # quoting is load-bearing: under YAML 1.1 an unquoted `on` key is the boolean
+  # `true`. Prettier does not rewrite keys, so this is safe -- but pin the
+  # settings rather than inheriting them, so a future edit to the block above
+  # cannot quietly change how CI is parsed.
+  - files: [".github/workflows/*.yaml", ".github/workflows/*.yml"]
+    options:
+      singleQuote: false
+      proseWrap: preserve

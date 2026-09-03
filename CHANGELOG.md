@@ -39,7 +39,7 @@ under one number, so there is one changelog. Workspaces that version crates
 independently need a changelog per crate — decide which you are before the first
 release, because switching later means rewriting history.
 
-**Bumping the MSRV is a `minor` bump, not a `major` one.** *M-MSRV*: raising
+**Bumping the MSRV is a `minor` bump, not a `major` one.** _M-MSRV_: raising
 the minimum supported Rust version "warrants only minor version increments",
 because the ecosystem already depends on reasonably modern compilers through
 transitive dependencies. Still record it — it is the single most common reason a

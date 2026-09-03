@@ -39,12 +39,12 @@ compiler enforces, not a directory name a linter enforces.
 
 **Unit tests and integration tests are not the same test.**
 
-| | `#[cfg(test)] mod tests` in `src/domain/order.rs` | `tests/order-lifecycle.rs` |
-|---|---|---|
-| Compiled as | part of this crate | a separate crate |
-| Can see | private fields, private functions | only what `lib.rs` re-exports |
-| Tests | that the implementation is right | that the API is usable |
-| Breaks when | internals change | the public API changes |
+|             | `#[cfg(test)] mod tests` in `src/domain/order.rs` | `tests/order-lifecycle.rs`    |
+| ----------- | ------------------------------------------------- | ----------------------------- |
+| Compiled as | part of this crate                                | a separate crate              |
+| Can see     | private fields, private functions                 | only what `lib.rs` re-exports |
+| Tests       | that the implementation is right                  | that the API is usable        |
+| Breaks when | internals change                                  | the public API changes        |
 
 Both files say so in their own comments, and the integration test has a
 commented-out line that does not compile, to make the boundary concrete.
@@ -55,6 +55,6 @@ commented-out line that does not compile, to make the boundary concrete.
 all, on purpose: this is the crate everything else depends on, so every
 dependency added here is added to everything.
 
-Note what is *not* here. There is no `toml` or `serde_json`, because choosing a
+Note what is _not_ here. There is no `toml` or `serde_json`, because choosing a
 configuration file format is an application decision. There is no `anyhow`,
 because a library's callers need to match on errors.

@@ -1,0 +1,29 @@
+# Same syntax as .gitignore.
+#
+# Prettier only formats what it has a parser for: Markdown, YAML, JSON, HTML,
+# CSS and JavaScript. Rust, TOML and extensionless files such as LICENSE are
+# skipped automatically, and node_modules and .git are ignored without being
+# told. None of that needs listing here.
+#
+# What is left is the case that actually matters: files Prettier *can* format
+# and must not.
+
+# Build output. `cargo doc` writes HTML, CSS and JavaScript into target/doc, and
+# Prettier will cheerfully reformat several thousand generated files if allowed
+# anywhere near them. This is the entry that earns this file its place.
+/target
+
+# `cargo vendor` output. Vendored source is not ours to reformat, and doing so
+# produces a diff large enough to hide the one line that mattered.
+/vendor
+
+# --- Add below, with a reason ------------------------------------------------
+#
+# Generated changelogs -- uncomment if you adopt release-plz or cargo-release,
+# which rewrite this file from commit messages:
+# CHANGELOG.md
+#
+# Fixtures whose exact formatting is the thing under test -- trybuild UI tests,
+# insta snapshots, golden files for a renderer:
+# crates/*/tests/ui/
+# **/snapshots/

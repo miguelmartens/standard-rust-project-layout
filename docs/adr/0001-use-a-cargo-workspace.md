@@ -45,7 +45,7 @@ users will actually get.
 **A workspace with nested crates** (`crates/app/core/`, `crates/app/macros/`).
 Rejected. It reads as a hierarchy that Cargo does not implement — `app-core` has
 no special relationship to `app` that the build system understands — and it
-contradicts *M-CRATES-FLAT-FOLDER*. Name prefixes convey the grouping at no cost.
+contradicts _M-CRATES-FLAT-FOLDER_. Name prefixes convey the grouping at no cost.
 
 **A root package plus workspace members**, with `app-core` at the repository
 root and the others under `crates/`. Rejected: it privileges one crate in the

@@ -25,8 +25,9 @@ for when you have more than one crate.
   - [Lints belong in `[workspace.lints]`](#lints-belong-in-workspacelints)
   - [Edition and MSRV](#edition-and-msrv)
   - [Errors: `thiserror` for libraries, `anyhow` for binaries](#errors-thiserror-for-libraries-anyhow-for-binaries)
-  - [When *not* to split into crates](#when-not-to-split-into-crates)
+  - [When _not_ to split into crates](#when-not-to-split-into-crates)
   - [Automation: `xtask`, not `make`](#automation-xtask-not-make)
+  - [Formatting the files rustfmt does not touch](#formatting-the-files-rustfmt-does-not-touch)
   - [Directories the ecosystem has no convention for](#directories-the-ecosystem-has-no-convention-for)
 - [Coming from Go](#coming-from-go)
 - [Anti-patterns](#anti-patterns)
@@ -41,9 +42,9 @@ for when you have more than one crate.
 [`golang-standards/project-layout`][go-layout] exists. It is also why the repo is
 widely criticised: it is one person's collection of patterns presented under a
 name — `golang-standards` — that implies an authority it does not have. The repo
-itself says so, at the top: *"This is **NOT an official standard defined by the
+itself says so, at the top: _"This is **NOT an official standard defined by the
 core Go dev team**. This is a set of common historical and emerging project
-layout patterns in the Go ecosystem."*
+layout patterns in the Go ecosystem."_
 
 **Rust does have an official layout.** [Cargo defines it][cargo-layout], enforces
 it through [target auto-discovery][cargo-targets], and every Rust developer
@@ -58,9 +59,9 @@ territory than the Go repository covers.
 
 Hence two halves, deliberately separated:
 
-| | |
-|---|---|
-| **[Part 1](#part-1--what-cargo-defines)** | **What Cargo defines.** Quoted from the Cargo Book. Non-negotiable. Deviating breaks tooling, not taste. |
+|                                               |                                                                                                                                            |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **[Part 1](#part-1--what-cargo-defines)**     | **What Cargo defines.** Quoted from the Cargo Book. Non-negotiable. Deviating breaks tooling, not taste.                                   |
 | **[Part 2](#part-2--what-cargo-leaves-open)** | **What Cargo leaves open.** Workspace organisation, docs, CI, deployment, tooling config. Recommendations, with reasons — argue with them. |
 
 Where an opinionated source disagrees with the Cargo Book, the Cargo Book wins,
@@ -107,7 +108,7 @@ Quoted verbatim from [the Cargo Book][cargo-layout]:
 ```
 
 > - `Cargo.toml` and `Cargo.lock` are stored in the root of your package
->   (*package root*).
+>   (_package root_).
 > - Source code goes in the `src` directory.
 > - The default library file is `src/lib.rs`.
 > - The default executable file is `src/main.rs`.
@@ -119,7 +120,7 @@ Quoted verbatim from [the Cargo Book][cargo-layout]:
 And for targets that outgrow one file:
 
 > If a binary, example, bench, or integration test consists of multiple source
-> files, place a `main.rs` file along with the extra *modules* within a
+> files, place a `main.rs` file along with the extra _modules_ within a
 > subdirectory of the `src/bin`, `examples`, `benches`, or `tests` directory.
 > The name of the executable will be the directory name.
 
@@ -134,14 +135,14 @@ when a project outgrows this, and most projects never do.
 
 The directory names above are not decoration — Cargo scans for them.
 
-| Target | Discovered at | Target name |
-|---|---|---|
-| library | `src/lib.rs` | package name, dashes → underscores |
-| default binary | `src/main.rs` | package name, dashes kept |
-| extra binaries | `src/bin/*.rs`, `src/bin/*/main.rs` | file stem, or directory name |
-| examples | `examples/*.rs`, `examples/*/main.rs` | file stem, or directory name |
-| integration tests | `tests/*.rs`, `tests/*/main.rs` | file stem, or directory name |
-| benchmarks | `benches/*.rs`, `benches/*/main.rs` | file stem, or directory name |
+| Target            | Discovered at                         | Target name                        |
+| ----------------- | ------------------------------------- | ---------------------------------- |
+| library           | `src/lib.rs`                          | package name, dashes → underscores |
+| default binary    | `src/main.rs`                         | package name, dashes kept          |
+| extra binaries    | `src/bin/*.rs`, `src/bin/*/main.rs`   | file stem, or directory name       |
+| examples          | `examples/*.rs`, `examples/*/main.rs` | file stem, or directory name       |
+| integration tests | `tests/*.rs`, `tests/*/main.rs`       | file stem, or directory name       |
+| benchmarks        | `benches/*.rs`, `benches/*/main.rs`   | file stem, or directory name       |
 
 > For [auto discovered] targets, it defaults to the directory or file name.
 >
@@ -172,21 +173,21 @@ Two different rules, and mixing them up is the most common naming mistake.
 
 **Modules and crates are `snake_case`**, per [RFC 430][rfc430]:
 
-| Item | Convention |
-|---|---|
-| Crates | `snake_case` (but prefer a single word) |
-| Modules | `snake_case` |
-| Types, traits, enum variants | `UpperCamelCase` |
-| Functions, methods, local variables | `snake_case` |
-| Statics and constants | `SCREAMING_SNAKE_CASE` |
-| Type parameters | concise `UpperCamelCase`, usually `T` |
-| Lifetimes | short and lowercase, `'a` |
+| Item                                | Convention                              |
+| ----------------------------------- | --------------------------------------- |
+| Crates                              | `snake_case` (but prefer a single word) |
+| Modules                             | `snake_case`                            |
+| Types, traits, enum variants        | `UpperCamelCase`                        |
+| Functions, methods, local variables | `snake_case`                            |
+| Statics and constants               | `SCREAMING_SNAKE_CASE`                  |
+| Type parameters                     | concise `UpperCamelCase`, usually `T`   |
+| Lifetimes                           | short and lowercase, `'a`               |
 
 Acronyms count as one word: `Uuid`, not `UUID`; `is_xid_start`, not `is_XID_start`.
 
 **Target names are kebab-case.** Package names on crates.io are conventionally
 hyphenated (`app-core`, `serde-json`… ) and so are the file names in `tests/`,
-`examples/`, `benches/` and `src/bin/`, because the file name *is* the target
+`examples/`, `benches/` and `src/bin/`, because the file name _is_ the target
 name:
 
 ```text
@@ -199,13 +200,13 @@ These files are crate roots, not modules, which is why the module rule does not
 apply to them. Cargo replaces hyphens with underscores when the package name
 becomes a library's crate name: package `app-core` is `use app_core::…`.
 
-One more from the [API guidelines][api-naming]: *"Crate names should not use
+One more from the [API guidelines][api-naming]: _"Crate names should not use
 `-rs` or `-rust` as a suffix or prefix. Every crate is Rust! It serves no
-purpose to remind users of this constantly."*
+purpose to remind users of this constantly."_
 
 ## Module layout inside `src/`
 
-Cargo owns the directory names; the file layout *inside* `src/` is the module
+Cargo owns the directory names; the file layout _inside_ `src/` is the module
 system's business, and there the language gives you two forms.
 
 **Prefer `foo.rs` + `foo/` over `foo/mod.rs`.** From the [edition guide][paths]:
@@ -255,23 +256,23 @@ it costs six lines.
 They are not two styles for the same job. They see different code and break for
 different reasons, and a project wants both.
 
-| | Unit test | Integration test |
-|---|---|---|
-| Lives in | `#[cfg(test)] mod tests`, same file as the code | `tests/*.rs` |
-| Compiled as | part of the crate | **a separate crate** |
-| Can see | private fields and private functions | only what `lib.rs` re-exports |
-| Answers | "is the implementation right?" | "is the API usable?" |
-| Breaks when | internals change | the public API changes |
+|             | Unit test                                       | Integration test              |
+| ----------- | ----------------------------------------------- | ----------------------------- |
+| Lives in    | `#[cfg(test)] mod tests`, same file as the code | `tests/*.rs`                  |
+| Compiled as | part of the crate                               | **a separate crate**          |
+| Can see     | private fields and private functions            | only what `lib.rs` re-exports |
+| Answers     | "is the implementation right?"                  | "is the API usable?"          |
+| Breaks when | internals change                                | the public API changes        |
 
 From [the Book][book-tests]:
 
-> You'll put unit tests in the *src* directory in each file with the code that
+> You'll put unit tests in the _src_ directory in each file with the code that
 > they're testing. The convention is to create a module named `tests` in each
 > file to contain the test functions and to annotate the module with `cfg(test)`.
 
 and:
 
-> Each file in the *tests* directory is a separate crate, so we need to bring our
+> Each file in the _tests_ directory is a separate crate, so we need to bring our
 > library into each test crate's scope. […] They use your library in the same way
 > any other code would, which means they can only call functions that are part of
 > your library's public API.
@@ -280,7 +281,7 @@ This repository makes the contrast concrete on purpose. Compare the unit tests
 at the bottom of [`crates/app-core/src/domain/order.rs`](crates/app-core/src/domain/order.rs),
 which assert on the private `status` and `lines` fields, with
 [`crates/app-core/tests/order-lifecycle.rs`](crates/app-core/tests/order-lifecycle.rs),
-which contains those same assertions commented out and marked *DOES NOT COMPILE*.
+which contains those same assertions commented out and marked _DOES NOT COMPILE_.
 
 **There is no mirrored `test/` tree.** Rust does not have one and does not want
 one. Tests either sit beside the code or sit at the API boundary; there is no
@@ -330,11 +331,11 @@ and the reasons in the [Cargo FAQ][faq-lock] apply to both:
 > - Reducing confusion when contributors see different behavior as compared to
 >   other contributors or CI
 
-The old advice — *binaries commit it, libraries do not* — came from a real
+The old advice — _binaries commit it, libraries do not_ — came from a real
 observation and drew the wrong conclusion. The observation is that
 `Cargo.lock` "does not affect the consumers of your package, only `Cargo.toml`
 does that"; a library's lockfile is ignored by everyone downstream. The wrong
-conclusion is that it is therefore useless. It is not useless to *you*: it makes
+conclusion is that it is therefore useless. It is not useless to _you_: it makes
 your own CI reproducible, which is where you spend your time.
 
 What you lose by committing it is coverage of newer dependency versions. Get
@@ -364,10 +365,10 @@ yours has one, [Part 1](#part-1--what-cargo-defines) was the whole document.
 Two or more related crates means one workspace. From the
 [Microsoft Rust guidelines][ms-project]:
 
-- ***M-CARGO-WORKSPACE*** — "Common settings come from the workspace
+- _**M-CARGO-WORKSPACE**_ — "Common settings come from the workspace
   `Cargo.toml`."
-- ***M-CRATES-IN-WORKSPACE*** — "The workspace lists and versions all crates."
-- ***M-CRATES-FLAT-FOLDER*** — "All crates are siblings in one folder."
+- _**M-CRATES-IN-WORKSPACE**_ — "The workspace lists and versions all crates."
+- _**M-CRATES-FLAT-FOLDER**_ — "All crates are siblings in one folder."
 
 ```text
 ✅  crates/app-core/            ❌  crates/app/core/
@@ -390,7 +391,7 @@ anyway.
 `[package]`:
 
 > Alternatively, a `Cargo.toml` file can be created with a `[workspace]` section
-> but without a `[package]` section. This is called a *virtual manifest*.
+> but without a `[package]` section. This is called a _virtual manifest_.
 >
 > — [Cargo Workspaces][cargo-workspaces]
 
@@ -439,7 +440,7 @@ app-core.workspace = true    # not { path = "../app-core" }
 anyhow.workspace = true
 ```
 
-**Sibling crates get `path` *and* `version`.** *M-CRATES-IN-WORKSPACE*: instead
+**Sibling crates get `path` _and_ `version`.** _M-CRATES-IN-WORKSPACE_: instead
 of `sibling.path = "../sibling"`, intra-workspace dependencies resolve via
 `sibling.workspace = true` with the canonical version declared centrally. `path`
 is what a local build uses; `version` is what a published crate records for its
@@ -474,8 +475,8 @@ todo = "warn"
 ```
 
 The `priority = -1` is load-bearing. From the [manifest reference][manifest]:
-*"lower (particularly negative) numbers have lower priority, being overridden by
-higher numbers"*. Groups go below the individual lints so that a specific lint
+_"lower (particularly negative) numbers have lower priority, being overridden by
+higher numbers"_. Groups go below the individual lints so that a specific lint
 can override a group it belongs to. Without it, `clippy::pedantic` and
 `clippy::unwrap_used` fight and Cargo reports an ambiguity error.
 
@@ -498,13 +499,13 @@ Which lints are on is a Cargo concern, and belongs where every crate inherits it
 
 ## Edition and MSRV
 
-**Latest edition, always.** ***M-LATEST-EDITION***: new crates set `edition` to
+**Latest edition, always.** _**M-LATEST-EDITION**_: new crates set `edition` to
 the latest stable release, currently `2024` at minimum. Older editions provide no
 downstream compatibility advantage — a 2015-edition crate can depend on a
 2024-edition crate without friction, and vice versa. An old edition on a new
 crate buys nothing and costs you the modern syntax.
 
-**Set an MSRV on day one, and keep it behind stable.** ***M-MSRV***: libraries
+**Set an MSRV on day one, and keep it behind stable.** _**M-MSRV**_: libraries
 declare a minimum supported Rust version at creation and update it as new
 compiler features become necessary, staying a few versions behind current
 release.
@@ -515,8 +516,8 @@ edition = "2024"
 rust-version = "1.85"   # the floor for edition 2024
 ```
 
-**Bumping the MSRV is a *minor* version bump, not a major one.** This surprises
-people. The reasoning in *M-MSRV* is that ecosystem projects already depend on
+**Bumping the MSRV is a _minor_ version bump, not a major one.** This surprises
+people. The reasoning in _M-MSRV_ is that ecosystem projects already depend on
 reasonably modern compilers through their transitive dependencies, so treating
 every MSRV bump as a breaking change produces major-version churn that helps
 nobody. Note it in the changelog, because it is the most common reason a
@@ -535,7 +536,7 @@ twice is how the two drift apart.
 
 Not a matter of taste. It follows from who the caller is.
 
-**Libraries use [`thiserror`][thiserror].** Callers need to *match* on failures to
+**Libraries use [`thiserror`][thiserror].** Callers need to _match_ on failures to
 decide what to do, so the error has to be a real type with real variants.
 `thiserror` generates the `Display` and `Error` impls and then disappears — it
 does not show up in your public API.
@@ -558,7 +559,7 @@ never fail, made to someone who cannot check it and will be the one to see the
 panic. If you can prove it, write the proof in a comment next to the allow. If
 you cannot, return a `Result`.
 
-## When *not* to split into crates
+## When _not_ to split into crates
 
 **A single-crate project does not need a `crates/` directory.** `src/` at the
 repository root is the correct layout, and this repository would be smaller and
@@ -610,13 +611,56 @@ Why it beats a Makefile:
 
 The cost is that the first `cargo xtask` in a clean checkout compiles the crate,
 which is why [`xtask/`](xtask/) has **zero dependencies** and should keep none.
-matklad's own advice: *"It is advisable to minimize the compile time of xtasks."*
+matklad's own advice: _"It is advisable to minimize the compile time of xtasks."_
 `std::env::args().nth(1)` is enough; adding `clap` here makes every contributor
 pay for argument parsing before their first check.
 
-`xtask` runs when you ask it to — *"xtasks do not integrate with Cargo
-lifecycle"*. Compile-time code generation is `build.rs`, a different mechanism
+`xtask` runs when you ask it to — _"xtasks do not integrate with Cargo
+lifecycle"_. Compile-time code generation is `build.rs`, a different mechanism
 with a different cost.
+
+## Formatting the files rustfmt does not touch
+
+`cargo fmt` covers `.rs` and nothing else. That leaves the Markdown, YAML, JSON
+and TOML in a typical repository unformatted, which is where "please fix the
+indentation" review comments come from.
+
+| Files                      | Tool                                          | Config                                                             |
+| -------------------------- | --------------------------------------------- | ------------------------------------------------------------------ |
+| `*.rs`                     | rustfmt                                       | [`rustfmt.toml`](rustfmt.toml), via `cargo fmt --check`            |
+| `*.md`, `*.yaml`, `*.json` | [Prettier](https://prettier.io)               | [`.prettierrc`](.prettierrc), [`.prettierignore`](.prettierignore) |
+| `*.toml`                   | [taplo](https://taplo.tamasfe.dev/), optional | not used here                                                      |
+| line endings               | git                                           | [`.gitattributes`](.gitattributes)                                 |
+
+**Rust has no convention for any of this** and Cargo has no opinion, so the
+table above is a defensible default rather than a rule. Prettier is the
+ecosystem-agnostic choice because most people already have it;
+[dprint](https://dprint.dev/) is faster and does handle TOML, at the cost of
+being far less widely installed.
+
+Three things are worth copying whichever tool you pick.
+
+**Keep the hard requirement at `rustup`.** Prettier here is optional locally and
+mandatory in CI: `cargo xtask fmt` runs it when it is on `PATH` and prints a skip
+notice when it is not, while the CI runner always has Node. A contributor is
+never blocked on a Node install, and the config still cannot drift — which is the
+only reason to have it in a repository at all.
+
+**Enforce line endings in `.gitattributes`, not only `.editorconfig`.**
+`.editorconfig` asks the editor nicely; `* text=auto eol=lf` makes git normalise
+the index and check out LF on Windows. This matters more in Rust than people
+expect, because **rustfmt does not normalise line endings** — a CRLF file passes
+`cargo fmt --check` on the machine that wrote it and arrives as a whole-file diff
+for the next person.
+
+**Turn on the built-in diff drivers while you are there.** `*.rs diff=rust` puts
+the enclosing `fn` or `impl` in every hunk header instead of a bare line number.
+It is one line, it is built into git, and almost nobody has it on.
+
+One trap, since this repository hit it: `.prettierrc` is read as JSON _or_ YAML,
+and JSON-with-comments does not error — it parses as YAML, turns the comment into
+a key, ignores every option after it, and exits 0. Write the file as YAML (as
+here, so it can explain itself) or as strict JSON with no comments at all.
 
 ## Directories the ecosystem has no convention for
 
@@ -624,15 +668,15 @@ Everything below this line: **Rust has no convention, and neither does this
 document beyond "pick one and be consistent".** Cargo does not know these
 directories exist. Common choices, with a defensible default in bold:
 
-| Purpose | Common names | Notes |
-|---|---|---|
-| Long-form docs | **`docs/`**, `doc/`, `book/` | `cargo doc` is the API reference; this is what does not fit in a `///` comment. |
-| Decision records | **`docs/adr/`**, `docs/decisions/`, `rfcs/` | See [`docs/adr/README.md`](docs/adr/README.md) for a template. |
-| Deployment | **`deploy/`**, `deployments/`, `infra/`, `ops/`, `k8s/` | Dockerfiles, manifests, Terraform. |
-| Static files | **`assets/`**, `resources/`, `static/`, `data/` | Must stay *outside* `src/`, which Cargo compiles. |
-| Shell scripts | **`scripts/`** | Prefer `xtask`. See [`scripts/README.md`](scripts/README.md). |
-| Schemas | **`proto/`**, `openapi/`, `schemas/` | Whatever the code generator expects. |
-| Migrations | **`migrations/`** | Set by your ORM (`sqlx`, `diesel`), not by you. |
+| Purpose          | Common names                                            | Notes                                                                           |
+| ---------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Long-form docs   | **`docs/`**, `doc/`, `book/`                            | `cargo doc` is the API reference; this is what does not fit in a `///` comment. |
+| Decision records | **`docs/adr/`**, `docs/decisions/`, `rfcs/`             | See [`docs/adr/README.md`](docs/adr/README.md) for a template.                  |
+| Deployment       | **`deploy/`**, `deployments/`, `infra/`, `ops/`, `k8s/` | Dockerfiles, manifests, Terraform.                                              |
+| Static files     | **`assets/`**, `resources/`, `static/`, `data/`         | Must stay _outside_ `src/`, which Cargo compiles.                               |
+| Shell scripts    | **`scripts/`**                                          | Prefer `xtask`. See [`scripts/README.md`](scripts/README.md).                   |
+| Schemas          | **`proto/`**, `openapi/`, `schemas/`                    | Whatever the code generator expects.                                            |
+| Migrations       | **`migrations/`**                                       | Set by your ORM (`sqlx`, `diesel`), not by you.                                 |
 
 **Delete the ones you do not use.** An empty `deploy/` containing only a README
 is worse than no `deploy/`: it implies a deployment story exists and sends
@@ -649,28 +693,28 @@ mistake is bringing the directory structure across wholesale.** Most of Go's
 top-level directories are answers to questions Rust answers elsewhere — in the
 language, in Cargo, or not at all.
 
-| [`golang-standards/project-layout`][go-layout] | Rust equivalent |
-|---|---|
-| `cmd/` | `src/bin/`, or a dedicated `crates/<name>-cli` crate |
-| `internal/` | **Just don't write `pub`.** Visibility is compiler-enforced |
-| `pkg/` | `src/` for one crate, `crates/` for several |
-| `api/` | `proto/`, `openapi/` — not language-defined |
-| `vendor/` | `cargo vendor` if truly needed; `Cargo.lock` usually suffices |
-| `test/` | `tests/` for integration; `#[cfg(test)] mod tests` for unit |
-| `configs/` | `config/` or `assets/` — no Rust convention |
-| `build/`, `Makefile` | `xtask/`, or `just` / `cargo-make` |
-| `third_party/` | `Cargo.toml` dependencies; forks via `[patch]` |
-| `scripts/` | `xtask/` first; `scripts/` for bootstrapping only |
-| `docs/` | `cargo doc` for the API; `docs/` for everything else |
-| `examples/` | `examples/` — same name, but Cargo compiles it |
-| `web/`, `assets/` | `assets/` — no convention, keep it outside `src/` |
-| `init/`, `deployments/` | `deploy/` — no convention |
-| `githooks/` | `.githooks/` or `scripts/` — no convention, and no need for a top-level directory |
+| [`golang-standards/project-layout`][go-layout] | Rust equivalent                                                                   |
+| ---------------------------------------------- | --------------------------------------------------------------------------------- |
+| `cmd/`                                         | `src/bin/`, or a dedicated `crates/<name>-cli` crate                              |
+| `internal/`                                    | **Just don't write `pub`.** Visibility is compiler-enforced                       |
+| `pkg/`                                         | `src/` for one crate, `crates/` for several                                       |
+| `api/`                                         | `proto/`, `openapi/` — not language-defined                                       |
+| `vendor/`                                      | `cargo vendor` if truly needed; `Cargo.lock` usually suffices                     |
+| `test/`                                        | `tests/` for integration; `#[cfg(test)] mod tests` for unit                       |
+| `configs/`                                     | `config/` or `assets/` — no Rust convention                                       |
+| `build/`, `Makefile`                           | `xtask/`, or `just` / `cargo-make`                                                |
+| `third_party/`                                 | `Cargo.toml` dependencies; forks via `[patch]`                                    |
+| `scripts/`                                     | `xtask/` first; `scripts/` for bootstrapping only                                 |
+| `docs/`                                        | `cargo doc` for the API; `docs/` for everything else                              |
+| `examples/`                                    | `examples/` — same name, but Cargo compiles it                                    |
+| `web/`, `assets/`                              | `assets/` — no convention, keep it outside `src/`                                 |
+| `init/`, `deployments/`                        | `deploy/` — no convention                                                         |
+| `githooks/`                                    | `.githooks/` or `scripts/` — no convention, and no need for a top-level directory |
 
 ### `internal/` in particular
 
 **`internal/` solves a problem Rust does not have.** Go needed the compiler to
-special-case a *directory name* because Go has no visibility modifier beyond
+special-case a _directory name_ because Go has no visibility modifier beyond
 capitalisation, and capitalisation is per-identifier with no notion of "public
 within this module but not outside it".
 
@@ -679,7 +723,7 @@ the compiler, all local to the item rather than to a directory. Creating an
 `internal/` module in Rust adds a naming convention on top of a language feature
 that already does the job better — and the private-module-plus-`pub use` façade
 in [Part 1](#module-layout-inside-src) gives you the same encapsulation with a
-*better* public API, because the internal path never appears in a `use`
+_better_ public API, because the internal path never appears in a `use`
 statement at all.
 
 ### `pkg/` and `cmd/`
@@ -709,13 +753,13 @@ Things that will get flagged in review, and what to do instead.
 **Crates nested inside other crates.** `crates/app/core/`, or worse
 `crates/app-cli/src/macros/` with its own `Cargo.toml`. Cargo does not find them,
 `cargo build` does not build them, and no reader expects them. Flat siblings in
-one directory; express relationships with name prefixes. *M-CRATES-FLAT-FOLDER*.
+one directory; express relationships with name prefixes. _M-CRATES-FLAT-FOLDER_.
 
 **`path` dependencies between siblings.** `app-core = { path = "../app-core" }`
 works locally and then produces a crate that cannot be published, because there
 is no version requirement for consumers to resolve. Use
-`app-core.workspace = true` with `path` *and* `version` declared once in
-`[workspace.dependencies]`. *M-CRATES-IN-WORKSPACE*.
+`app-core.workspace = true` with `path` _and_ `version` declared once in
+`[workspace.dependencies]`. _M-CRATES-IN-WORKSPACE_.
 
 **`mod.rs` everywhere.** Legal, but it fills your editor with identical tab
 titles for no benefit. `foo.rs` + `foo/`. And whichever you pick, do not mix
@@ -771,8 +815,11 @@ one source of confusion.
 ├── clippy.toml                    # thresholds only; lint selection is in Cargo.toml
 ├── deny.toml                      # cargo-deny: advisories, licences, bans, sources
 ├── .cargo/config.toml             # [alias] xtask = "run --package xtask --"
-├── .editorconfig
+├── .editorconfig                  # editors: LF, indent width
+├── .gitattributes                 # git: LF enforced, plus diff=rust
 ├── .gitignore                     # note what is NOT ignored
+├── .prettierrc                    # Markdown/YAML/JSON — what rustfmt misses
+├── .prettierignore
 ├── README.md                      # you are here
 ├── CONTRIBUTING.md
 ├── CHANGELOG.md
@@ -822,7 +869,10 @@ $ cargo doc --workspace --no-deps --open
 ### Using it as a template
 
 1. Copy `Cargo.toml`, `rust-toolchain.toml`, `rustfmt.toml`, `clippy.toml`,
-   `deny.toml`, `.cargo/config.toml`, `xtask/` and the CI workflow.
+   `deny.toml`, `.cargo/config.toml`, `xtask/` and the CI workflow. Take
+   `.gitattributes`, `.editorconfig`, `.prettierrc` and `.prettierignore` too —
+   they are four small files that end the line-ending and indentation arguments
+   permanently.
 2. **If you have one crate, stop there.** Put `src/` at the repository root, drop
    the workspace, and re-read [Part 1](#part-1--what-cargo-defines).
 3. If you have several, keep `crates/` and delete the example crates.
@@ -851,8 +901,8 @@ $ cargo doc --workspace --no-deps --open
 
 ### Opinionated, well-reasoned — the source of most of Part 2
 
-- [Microsoft: Rust Guidelines — Project][ms-project] — *M-CARGO-WORKSPACE*,
-  *M-CRATES-IN-WORKSPACE*, *M-CRATES-FLAT-FOLDER*, *M-LATEST-EDITION*, *M-MSRV*
+- [Microsoft: Rust Guidelines — Project][ms-project] — _M-CARGO-WORKSPACE_,
+  _M-CRATES-IN-WORKSPACE_, _M-CRATES-FLAT-FOLDER_, _M-LATEST-EDITION_, _M-MSRV_
 - [matklad: `cargo-xtask`][xtask] — automation in Rust rather than Make
 - [`thiserror`][thiserror] and [`anyhow`][anyhow] — the library/binary error split
 - [`cargo-deny`][cargo-deny] — advisories, licences, bans, sources

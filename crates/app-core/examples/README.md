@@ -16,8 +16,8 @@ the directory name.
 `--all-targets`. **An example that stops compiling breaks the build.** A snippet
 in a README rots silently and is wrong by the time someone copies it.
 
-Doc examples in `///` comments get the same guarantee — they are compiled *and
-executed* by `cargo test --doc` — and are better for anything short, because
+Doc examples in `///` comments get the same guarantee — they are compiled _and
+executed_ by `cargo test --doc` — and are better for anything short, because
 they sit next to the item they document. Use `examples/` when the code is too
 long for a doc comment or needs to be run interactively.
 

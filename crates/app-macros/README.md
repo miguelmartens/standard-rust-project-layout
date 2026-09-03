@@ -7,7 +7,7 @@ Procedural macros. **The one crate split Rust forces on you.**
 proc-macro = true
 ```
 
-That line changes how the crate is compiled: it is built for the *host* and
+That line changes how the crate is compiled: it is built for the _host_ and
 dynamically loaded into `rustc`, and it may export nothing but macros. Domain
 types cannot live alongside them. There is no arrangement of modules that avoids
 this, and no judgement call to make.

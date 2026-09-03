@@ -17,6 +17,6 @@ nothing else, because `proc_macro::TokenStream` panics when constructed outside 
 real compilation. Real macro crates avoid that by parsing into `proc_macro2`
 types, which work anywhere and make the interesting logic unit-testable.
 
-For error paths, ```` ```compile_fail ```` doctests cover the simple cases and
-[`trybuild`](https://docs.rs/trybuild) covers them properly, by asserting on the
+For error paths, a doctest fenced as `compile_fail` covers the simple cases, and
+[`trybuild`](https://docs.rs/trybuild) covers them properly by asserting on the
 exact diagnostic a user would see.
