@@ -677,7 +677,7 @@ directories exist. Common choices, with a defensible default in bold:
 | Purpose          | Common names                                            | Notes                                                                           |
 | ---------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | Long-form docs   | **`docs/`**, `doc/`, `book/`                            | `cargo doc` is the API reference; this is what does not fit in a `///` comment. |
-| Decision records | **`docs/adr/`**, `docs/decisions/`, `rfcs/`             | See [`docs/adr/README.md`](docs/adr/README.md) for a template.                  |
+| Decision records | **`docs/adr/`**, `docs/decisions/`, `rfcs/`             | [`docs/adr/`](docs/adr/) has a template and a worked example.                   |
 | Deployment       | **`deploy/`**, `deployments/`, `infra/`, `ops/`, `k8s/` | Dockerfiles, manifests, Terraform.                                              |
 | Static files     | **`assets/`**, `resources/`, `static/`, `data/`         | Must stay _outside_ `src/`, which Cargo compiles.                               |
 | Shell scripts    | **`scripts/`**                                          | Prefer `xtask`. See [`scripts/README.md`](scripts/README.md).                   |
@@ -854,6 +854,8 @@ $ cargo doc --workspace --no-deps --open
 - [matklad: `cargo-xtask`][xtask] — automation in Rust rather than Make
 - [`thiserror`][thiserror] and [`anyhow`][anyhow] — the library/binary error split
 - [`cargo-deny`][cargo-deny] — advisories, licences, bans, sources
+- [architecture-decision-record][adr-index] — ADR templates and conventions;
+  the source for [`docs/adr/`](docs/adr/)
 
 ### Prior art — compared against, not copied
 
@@ -880,6 +882,7 @@ $ cargo doc --workspace --no-deps --open
 [thiserror]: https://docs.rs/thiserror
 [anyhow]: https://docs.rs/anyhow
 [cargo-deny]: https://embarkstudios.github.io/cargo-deny/
+[adr-index]: https://github.com/architecture-decision-record/architecture-decision-record
 
 ---
 
