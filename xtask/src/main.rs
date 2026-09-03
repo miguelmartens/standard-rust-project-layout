@@ -53,8 +53,8 @@ const HELP: &str = "\
 cargo xtask <TASK>
 
 TASKS:
-    ci      fmt --check, clippy, tests, doctests, and rustdoc -- what CI runs
-    fmt     format the workspace in place
+    ci      fmt, prettier, clippy, tests, doctests, rustdoc -- what CI runs
+    fmt     format in place: rustfmt, then prettier if it is installed
     lint    clippy over every target, warnings denied
     test    tests and doctests
     help    print this message
@@ -96,11 +96,81 @@ fn ci() -> Result<(), DynError> {
 }
 
 fn fmt() -> Result<(), DynError> {
-    cargo(&["fmt", "--all"])
+    cargo(&["fmt", "--all"])?;
+    prettier(Mode::Write)
 }
 
 fn fmt_check() -> Result<(), DynError> {
-    cargo(&["fmt", "--all", "--check"])
+    cargo(&["fmt", "--all", "--check"])?;
+    prettier(Mode::Check)
+}
+
+/// Whether a formatter should rewrite files or only report on them.
+#[derive(Debug, Clone, Copy)]
+enum Mode {
+    Check,
+    Write,
+}
+
+/// Runs Prettier over the files rustfmt does not touch: Markdown, YAML, JSON.
+///
+/// **Optional by design.** `rustup` is the only hard requirement for working on
+/// this repository, so a missing Prettier is a printed note rather than a
+/// failure. CI always has Node, so CI always runs it -- which is what stops
+/// `.prettierrc` from becoming configuration that nothing enforces.
+///
+/// There is deliberately no `npx --yes prettier` fallback. A build tool that
+/// silently downloads a package from the network on first use behaves
+/// differently offline, and behaving differently is worse than not running.
+fn prettier(mode: Mode) -> Result<(), DynError> {
+    let flag = match mode {
+        Mode::Check => "--check",
+        Mode::Write => "--write",
+    };
+    let root = workspace_root()?;
+
+    let local = root.join("node_modules").join(".bin").join("prettier");
+    let Some(program) = which("prettier").or_else(|| local.is_file().then_some(local)) else {
+        eprintln!("note: prettier not found, skipping `prettier {flag} .`");
+        eprintln!("note: `npm install --global prettier` to run it here; CI runs it regardless.");
+        return Ok(());
+    };
+
+    eprintln!("$ prettier {flag} .");
+    let status = Command::new(program)
+        .current_dir(&root)
+        .args([flag, "."])
+        .status()?;
+
+    if status.success() {
+        Ok(())
+    } else {
+        Err(format!("`prettier {flag} .` failed: {status}").into())
+    }
+}
+
+/// A minimal `which`: the first executable called `program` on `PATH`.
+///
+/// Hand-rolled because this crate has no dependencies and should keep none.
+/// The `PATHEXT` handling is what makes it correct on Windows, where the
+/// executable is `prettier.cmd` and not `prettier` -- precisely the class of
+/// bug a shell script gets wrong, and the reason this file is Rust.
+fn which(program: &str) -> Option<PathBuf> {
+    let path = env::var_os("PATH")?;
+    let extensions: Vec<String> = env::var("PATHEXT")
+        .map(|value| value.split(';').map(str::to_owned).collect())
+        .unwrap_or_default();
+
+    env::split_paths(&path).find_map(|directory| {
+        let bare = directory.join(program);
+        if bare.is_file() {
+            return Some(bare);
+        }
+        extensions
+            .iter()
+            .map(|extension| directory.join(format!("{program}{extension}")))
+            .find(|candidate| candidate.is_file())
+    })
 }
 
 /// `--all-targets` covers tests, examples and benches, not just `src/`. Lints
@@ -151,10 +221,11 @@ fn cargo(args: &[&str]) -> Result<(), DynError> {
 fn cargo_with_env(args: &[&str], env: &[(&str, &str)]) -> Result<(), DynError> {
     let cargo = env::var_os("CARGO").unwrap_or_else(|| OsString::from("cargo"));
 
+    eprint!("$ ");
     for (key, value) in env {
-        eprint!("$ {key}={value} ");
+        eprint!("{key}={value} ");
     }
-    eprintln!("$ cargo {}", args.join(" "));
+    eprintln!("cargo {}", args.join(" "));
 
     let status = Command::new(cargo)
         .current_dir(workspace_root()?)

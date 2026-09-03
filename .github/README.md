@@ -3,8 +3,8 @@
 GitHub-specific configuration. Nothing here is a Rust or Cargo concern; the
 directory exists because GitHub looks for these paths.
 
-- [`workflows/ci.yaml`](workflows/ci.yaml) — the CI pipeline: `check` (fmt,
-  clippy, tests, doctests, rustdoc), `msrv`, and `deny`.
+- [`workflows/ci.yaml`](workflows/ci.yaml) — the CI pipeline: `check` (rustfmt,
+  Prettier, clippy, tests, doctests, rustdoc), `msrv`, and `deny`.
 - [`dependabot.yml`](dependabot.yml) — weekly dependency and action updates.
 
 Also conventionally found here, and deliberately absent from this example
@@ -15,7 +15,7 @@ repository: `CODEOWNERS`, `PULL_REQUEST_TEMPLATE.md`, `ISSUE_TEMPLATE/`,
 
 `ci.yaml` uses the four-letter extension. `dependabot.yml` does not, because
 GitHub documents that exact filename and a misnamed Dependabot configuration
-fails *silently* — no error, no updates, no signal. Consistency loses to a
+fails _silently_ — no error, no updates, no signal. Consistency loses to a
 platform requirement.
 
 ## If you are not on GitHub

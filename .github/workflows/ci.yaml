@@ -41,8 +41,16 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - name: Formatting
+      - name: Formatting (Rust)
         run: cargo fmt --all --check
+
+      # Markdown, YAML and JSON -- the files rustfmt does not touch.
+      # Pinned to a major version: Prettier's output is stable within one, and
+      # this is the version contributors get from a plain `npm i -g prettier`.
+      # A project that needs an exact pin should add a package.json and a
+      # lockfile rather than tightening the range here.
+      - name: Formatting (Markdown, YAML, JSON)
+        run: npx --yes prettier@3 --check .
 
       # --all-targets so lints in tests, examples and benches count too.
       - name: Clippy
