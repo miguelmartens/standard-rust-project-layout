@@ -34,6 +34,11 @@ allow = [
 ]
 # How certain the text-matching has to be before a licence counts as identified.
 confidence-threshold = 0.93
+# The list above is a set of licences we are willing to accept, not a list of
+# licences we currently use. cargo-deny warns about entries nothing matched
+# ("license-not-encountered"); that warning is noise here, because the point of
+# pre-approving a licence is that no dependency uses it *yet*.
+unused-allowed-license = "allow"
 
 # --- bans: dependency hygiene ------------------------------------------------
 [bans]
