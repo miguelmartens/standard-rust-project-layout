@@ -32,7 +32,7 @@ jobs:
     name: fmt, clippy, test, doc
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       # No toolchain action: rustup ships on the runner and installs the
       # channel and components named in rust-toolchain.toml on first use.
@@ -74,7 +74,7 @@ jobs:
     name: minimum supported rust version
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       # The MSRV is declared once, in [workspace.package].rust-version.
       # Reading it here means bumping it is a one-line change.
@@ -101,7 +101,7 @@ jobs:
     name: licences and advisories
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: EmbarkStudios/cargo-deny-action@v2
         with:
           command: check advisories bans licenses sources
