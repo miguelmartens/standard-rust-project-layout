@@ -3,14 +3,15 @@
 A reference layout for Rust projects, and a working workspace that demonstrates
 it. `cargo build --workspace` succeeds; `cargo xtask ci` passes.
 
-If you arrived here from [`golang-standards/project-layout`][go-layout], start
-with [Coming from Go](#coming-from-go). If you are about to lay out your first
-Rust project, read [Part 1](#part-1--what-cargo-defines) and then stop; Part 2 is
-for when you have more than one crate.
+If you are about to lay out your first Rust project, read
+[Part 1](#part-1--what-cargo-defines) and then stop. Part 2 is for when you have
+more than one crate.
+
+_Inspired by [golang-standards/project-layout](https://github.com/golang-standards/project-layout)._
 
 ## Contents
 
-- [Read this first: Rust is not Go](#read-this-first-rust-is-not-go)
+- [Read this first](#read-this-first)
 - [Part 1 — What Cargo defines](#part-1--what-cargo-defines)
   - [The canonical package layout](#the-canonical-package-layout)
   - [Target auto-discovery](#target-auto-discovery)
@@ -29,33 +30,31 @@ for when you have more than one crate.
   - [Automation: `xtask`, not `make`](#automation-xtask-not-make)
   - [Formatting the files rustfmt does not touch](#formatting-the-files-rustfmt-does-not-touch)
   - [Directories the ecosystem has no convention for](#directories-the-ecosystem-has-no-convention-for)
-- [Coming from Go](#coming-from-go)
 - [Anti-patterns](#anti-patterns)
 - [This repository](#this-repository)
 - [References](#references)
 
 ---
 
-## Read this first: Rust is not Go
+## Read this first
 
-**Go has no official project layout.** That vacuum is why
-[`golang-standards/project-layout`][go-layout] exists. It is also why the repo is
-widely criticised: it is one person's collection of patterns presented under a
-name — `golang-standards` — that implies an authority it does not have. The repo
-itself says so, at the top: _"This is **NOT an official standard defined by the
-core Go dev team**. This is a set of common historical and emerging project
-layout patterns in the Go ecosystem."_
+**Rust already has an official project layout.** [Cargo defines
+it][cargo-layout], enforces it through [target
+auto-discovery][cargo-targets], and every Rust developer already expects it.
 
-**Rust does have an official layout.** [Cargo defines it][cargo-layout], enforces
-it through [target auto-discovery][cargo-targets], and every Rust developer
-already expects it. It is not advice. `src/lib.rs` is the library target because
-Cargo looks there; move it and there is no library. Put integration tests in
-`test/` instead of `tests/` and `cargo test` will not find them.
+It is not advice. `src/lib.rs` is the library target because Cargo looks there;
+move it and there is no library. Put integration tests in `test/` instead of
+`tests/` and `cargo test` will find nothing — and report success.
 
-So this repository is not the Rust translation of the Go one. Inventing a
-competing directory scheme in Rust does not produce a debatable convention, it
-produces a broken build. What is left over is real, but it is a much smaller
-territory than the Go repository covers.
+That makes a "standard layout" document for Rust a much smaller job than it first
+appears. Most of the territory is already settled, and a competing directory
+scheme does not produce a debatable convention, it produces a broken build. So
+the useful thing such a document can do is state plainly what is already decided,
+and then be honest that everything else is opinion.
+
+What is genuinely open is what Cargo has no view on: how to organise a workspace,
+where documentation and deployment configuration live, how to configure tooling.
+That is where writing a convention down earns its keep.
 
 Hence two halves, deliberately separated:
 
@@ -124,8 +123,8 @@ And for targets that outgrow one file:
 > subdirectory of the `src/bin`, `examples`, `benches`, or `tests` directory.
 > The name of the executable will be the directory name.
 
-That is the entire mandatory layout. It is smaller than Go's, and it is
-mandatory rather than suggested.
+That is the entire mandatory layout. It is short, and — unlike most things
+called a project layout — it is mandatory rather than suggested.
 
 **A single-crate project should look exactly like that and nothing more.** No
 `crates/`, no workspace, no `xtask`. Everything in Part 2 is what you reach for
@@ -309,9 +308,16 @@ pub(super) fn parent_only() {} // parent module only
 pub fn api() {}                // actually public
 ```
 
-The compiler enforces every one of those. A directory name cannot be enforced by
-anything except a linter and a code review, which is precisely why Go needed the
-compiler to special-case the name `internal`.
+The compiler enforces every one of those, per item, wherever the item happens to
+sit on disk. A directory that means "private" is a convention by comparison: it
+needs a linter and a reviewer to hold, it cannot express "visible to my parent
+module but no further", and it makes the file layout carry information the
+language already carries better.
+
+The private-module-plus-`pub use` façade
+[above](#module-layout-inside-src) goes further still. It gives the same
+encapsulation _and_ a better public API, because the internal path never appears
+in a caller's `use` statement at all.
 
 If you want a boundary stronger than a module — one the compiler will refuse to
 let anyone cross even inside the same project — the tool for that is a separate
@@ -686,66 +692,6 @@ unless you have something to put in it.
 
 ---
 
-## Coming from Go
-
-If you are porting a Go layout, this table is the short version. **The biggest
-mistake is bringing the directory structure across wholesale.** Most of Go's
-top-level directories are answers to questions Rust answers elsewhere — in the
-language, in Cargo, or not at all.
-
-| [`golang-standards/project-layout`][go-layout] | Rust equivalent                                                                   |
-| ---------------------------------------------- | --------------------------------------------------------------------------------- |
-| `cmd/`                                         | `src/bin/`, or a dedicated `crates/<name>-cli` crate                              |
-| `internal/`                                    | **Just don't write `pub`.** Visibility is compiler-enforced                       |
-| `pkg/`                                         | `src/` for one crate, `crates/` for several                                       |
-| `api/`                                         | `proto/`, `openapi/` — not language-defined                                       |
-| `vendor/`                                      | `cargo vendor` if truly needed; `Cargo.lock` usually suffices                     |
-| `test/`                                        | `tests/` for integration; `#[cfg(test)] mod tests` for unit                       |
-| `configs/`                                     | `config/` or `assets/` — no Rust convention                                       |
-| `build/`, `Makefile`                           | `xtask/`, or `just` / `cargo-make`                                                |
-| `third_party/`                                 | `Cargo.toml` dependencies; forks via `[patch]`                                    |
-| `scripts/`                                     | `xtask/` first; `scripts/` for bootstrapping only                                 |
-| `docs/`                                        | `cargo doc` for the API; `docs/` for everything else                              |
-| `examples/`                                    | `examples/` — same name, but Cargo compiles it                                    |
-| `web/`, `assets/`                              | `assets/` — no convention, keep it outside `src/`                                 |
-| `init/`, `deployments/`                        | `deploy/` — no convention                                                         |
-| `githooks/`                                    | `.githooks/` or `scripts/` — no convention, and no need for a top-level directory |
-
-### `internal/` in particular
-
-**`internal/` solves a problem Rust does not have.** Go needed the compiler to
-special-case a _directory name_ because Go has no visibility modifier beyond
-capitalisation, and capitalisation is per-identifier with no notion of "public
-within this module but not outside it".
-
-Rust has `pub`, `pub(crate)`, `pub(super)` and `pub(in path)`, all enforced by
-the compiler, all local to the item rather than to a directory. Creating an
-`internal/` module in Rust adds a naming convention on top of a language feature
-that already does the job better — and the private-module-plus-`pub use` façade
-in [Part 1](#module-layout-inside-src) gives you the same encapsulation with a
-_better_ public API, because the internal path never appears in a `use`
-statement at all.
-
-### `pkg/` and `cmd/`
-
-`pkg/` is a Go response to `internal/` — if `internal/` is private, something has
-to be public. Rust has no such split: `src/` is the crate, and what is public is
-what says `pub`.
-
-`cmd/` maps to `src/bin/` for a small extra binary, or a `-cli` crate when the
-binary has its own dependency set. The Go instinct of a thin `cmd/foo/main.go` is
-right and worth keeping — see [`crates/app-cli/src/main.rs`](crates/app-cli/src/main.rs),
-which is four lines and explains why.
-
-### What actually carries over
-
-The instincts, not the directories: keep binaries thin, keep the domain free of
-I/O, put deployment configuration somewhere obvious, write down decisions. Those
-were always the valuable part of the Go layout. The directory names were the
-part that was never a standard.
-
----
-
 ## Anti-patterns
 
 Things that will get flagged in review, and what to do instead.
@@ -765,8 +711,10 @@ is no version requirement for consumers to resolve. Use
 titles for no benefit. `foo.rs` + `foo/`. And whichever you pick, do not mix
 them.
 
-**An `internal/` or `pkg/` directory.** Go habits. Rust has `pub(crate)` and
-private modules, enforced by the compiler. See [above](#internal-in-particular).
+**A directory that means "private".** An `internal/` or `pkg/` split, imported
+from an ecosystem whose language could not express it. Rust has `pub(crate)`,
+`pub(super)` and private modules, all enforced by the compiler. See
+[Privacy is a language feature](#privacy-is-a-language-feature).
 
 **A `utils` / `helpers` / `common` junk-drawer module.** These names mean "I did
 not want to decide where this goes", and they grow monotonically because nothing
@@ -909,13 +857,11 @@ $ cargo doc --workspace --no-deps --open
 
 ### Prior art — compared against, not copied
 
-- [`golang-standards/project-layout`][go-layout] — the repository this one answers
 - [Rust-Trends/example_project_structure](https://github.com/Rust-Trends/example_project_structure)
 - [binnev/rust-template](https://github.com/binnev/rust-template/)
 - [Stack Overflow: recommended directory structure for a Rust project](https://stackoverflow.com/questions/38276960/what-is-the-recommended-directory-structure-for-a-rust-project)
 - [Djamware: Rust project structure and best practices](https://www.djamware.com/post/rust-project-structure-and-best-practices-for-clean-scalable-code)
 
-[go-layout]: https://github.com/golang-standards/project-layout
 [cargo-layout]: https://doc.rust-lang.org/cargo/guide/project-layout.html
 [cargo-targets]: https://doc.rust-lang.org/cargo/reference/cargo-targets.html
 [cargo-workspaces]: https://doc.rust-lang.org/cargo/reference/workspaces.html
