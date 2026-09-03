@@ -625,6 +625,18 @@ pay for argument parsing before their first check.
 lifecycle"_. Compile-time code generation is `build.rs`, a different mechanism
 with a different cost.
 
+**There is a [`Makefile`](Makefile) in this repository, and it contains no
+automation.** `make ci` runs `cargo xtask ci`; every recipe in it is one line of
+delegation. That is not a contradiction of the argument above, it is the point
+of it: `make` is muscle memory for a lot of people and costs nothing to offer,
+as long as the logic is not in it.
+
+The rule that keeps it that way is written at the top of the file — _if a recipe
+needs a second line, it has become automation, and automation goes in `xtask/`._
+A Makefile that grows recipes is the thing this section warns about; a Makefile
+that grows aliases is harmless. Delete it if your project has no `make` users;
+nothing depends on it, and CI does not call it.
+
 ## Formatting the files rustfmt does not touch
 
 `cargo fmt` covers `.rs` and nothing else. That leaves the Markdown, YAML, JSON
@@ -768,6 +780,7 @@ one source of confusion.
 ├── .gitignore                     # note what is NOT ignored
 ├── .prettierrc                    # Markdown/YAML/JSON — what rustfmt misses
 ├── .prettierignore
+├── Makefile                       # aliases for `cargo xtask` — no logic in it
 ├── README.md                      # you are here
 ├── CONTRIBUTING.md
 ├── CHANGELOG.md

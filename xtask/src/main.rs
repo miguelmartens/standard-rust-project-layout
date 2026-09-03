@@ -29,6 +29,11 @@
 //! The honest cost: the first `cargo xtask` in a clean checkout has to compile
 //! this crate. That is why it has no dependencies — see `Cargo.toml`.
 //!
+//! The repository does ship a `Makefile`, and it contains no automation:
+//! every recipe is one line forwarding to `cargo xtask`. Offering `make ci`
+//! to people who type it by reflex costs nothing, as long as the logic
+//! stays here.
+//!
 //! # A note on workspace membership
 //!
 //! `xtask` is a member of the main workspace here, which keeps it under the

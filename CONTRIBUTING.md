@@ -39,6 +39,10 @@ This runs exactly what CI runs, in the same order:
 Cheap checks fail first, so a misformatted file does not cost a full test run to
 discover.
 
+`make ci` does the same thing if that is what your fingers type. The
+[`Makefile`](Makefile) is aliases only — one line per recipe, forwarding to
+`cargo xtask`. New automation goes in [`xtask/`](xtask/), never into a recipe.
+
 `cargo xtask fmt` fixes formatting in place, for both formatters.
 `cargo clippy --fix` fixes many lints in place.
 

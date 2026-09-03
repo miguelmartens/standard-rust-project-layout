@@ -39,6 +39,13 @@ Rust."
 is one fewer thing to install and pin, and that "automation" and "the project"
 are then the same language, the same lints, and the same review standard.
 
+None of which is an argument against a Makefile that only _forwards_ here, and
+[`../Makefile`](../Makefile) is exactly that: `make ci` runs `cargo xtask ci`,
+one line per recipe. The table above compares places to _keep_ automation. A
+Makefile with no automation in it does not appear in that comparison, because it
+is not doing the job — it is a keyboard shortcut for people whose fingers type
+`make` before they finish reading the README.
+
 The honest cost: the first `cargo xtask` in a clean checkout compiles this
 crate. **Which is why it has no dependencies, and should keep none.** Adding
 `clap` here would make every contributor pay for argument parsing before their
