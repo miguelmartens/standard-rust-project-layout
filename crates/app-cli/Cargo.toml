@@ -1,0 +1,36 @@
+[package]
+name = "app-cli"
+description = "Command line front end for the example application."
+
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lints]
+workspace = true
+
+# The package is `app-cli`; the binary users type is `app`.
+#
+# Cargo would otherwise name the binary after the package. Naming them
+# separately is common (`ripgrep` ships `rg`, `cargo-edit` ships `cargo-add`)
+# and is worth knowing about before you contort a package name to get the
+# executable name you wanted.
+#
+# `path` is required here: Cargo only infers `src/main.rs` for a `[[bin]]` whose
+# name matches the package name.
+[[bin]]
+name = "app"
+path = "src/main.rs"
+
+[dependencies]
+# Sibling crates are referenced through the workspace, never as
+# `app-core = { path = "../app-core" }`.
+# M-CRATES-IN-WORKSPACE: one canonical version, declared once, in the root.
+app-core.workspace = true
+app-macros.workspace = true
+
+anyhow.workspace = true
+clap.workspace = true
