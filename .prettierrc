@@ -31,31 +31,29 @@
 # do not keep them.
 # ---------------------------------------------------------------------------
 
-# Match rustfmt's max_width, so a code block that fits inside a .rs file also
-# fits inside the Markdown that quotes it.
+# Four options. Two are real overrides, two are deliberate restatements, and the
+# comments say which -- because "why is this line here" is the question a config
+# file should never leave a reader asking.
+
+# OVERRIDE. Prettier's default is 80. 100 matches rustfmt's default max_width
+# (set by the Rust Style Guide, which is why rustfmt.toml does not restate it),
+# so a code block that fits inside a .rs file also fits inside the Markdown that
+# quotes it.
 printWidth: 100
 
-# Do NOT reflow prose. With `always`, changing a single word rewraps the whole
-# paragraph and the diff becomes unreadable -- the reviewer cannot see which
-# sentence changed. The Markdown here is hand-wrapped at ~80 for that reason,
-# and `preserve` leaves it alone.
+# OVERRIDE, and a non-obvious one. Prettier 3 reads .editorconfig by default,
+# and .editorconfig sets indent_size = 4 for [*], which covers Markdown. Without
+# this line, nested Markdown lists would indent by four. Verified: removing it
+# changes the output.
+tabWidth: 2
+
+# RESTATES THE DEFAULT, deliberately. `always` rewraps a whole paragraph when one
+# word changes, and the reviewer can no longer see which sentence moved. That is
+# a trap worth blocking in writing rather than leaving to whoever edits this file
+# next.
 proseWrap: preserve
 
-# Redundant three times over (.gitattributes enforces it, .editorconfig declares
-# it, and Prettier 3 reads .editorconfig by default). Stated anyway, because
-# this file takes precedence where they disagree -- so it had better agree.
+# RESTATES THE DEFAULT, as a cross-check. .gitattributes enforces LF in git and
+# .editorconfig declares it for editors; this file takes precedence over the
+# latter, so it had better agree with both. Three files, one answer.
 endOfLine: lf
-
-tabWidth: 2
-singleQuote: false
-
-overrides:
-  # GitHub Actions workflows are the one place in this repository where YAML
-  # quoting is load-bearing: under YAML 1.1 an unquoted `on` key is the boolean
-  # `true`. Prettier does not rewrite keys, so this is safe -- but pin the
-  # settings rather than inheriting them, so a future edit to the block above
-  # cannot quietly change how CI is parsed.
-  - files: [".github/workflows/*.yaml", ".github/workflows/*.yml"]
-    options:
-      singleQuote: false
-      proseWrap: preserve

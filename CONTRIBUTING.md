@@ -61,10 +61,17 @@ discover.
 ## House rules
 
 **Do not argue with `rustfmt`, or with Prettier.** [`rustfmt.toml`](rustfmt.toml)
-is two lines and should stay that way; [`.prettierrc`](.prettierrc) sets four
-options and one override. Its defaults are the Rust style guide; every option added
-is a permanent tax on every reader who has internalised the default output. If a
-line formats badly, the line is usually the problem.
+is one line and should stay that way. rustfmt's defaults _are_
+[the Rust Style Guide](https://doc.rust-lang.org/style-guide/), an official Rust
+project document, so an option added there is a claim that you know better than
+the thing rustfmt implements — and a permanent tax on every reader who has
+internalised the default output.
+
+[`.prettierrc`](.prettierrc) sets four options and labels each one as either an
+override or a deliberate restatement of a default, which is the standard to meet
+if you add a fifth.
+
+If a line formats badly, the line is usually the problem.
 
 **Lints are configured in one place.** `[workspace.lints]` in the root
 [`Cargo.toml`](Cargo.toml). Do not add `#![deny(...)]` to a crate root — it

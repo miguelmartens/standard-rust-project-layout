@@ -170,19 +170,27 @@ this repository.
 
 Two different rules, and mixing them up is the most common naming mistake.
 
-**Modules and crates are `snake_case`**, per [RFC 430][rfc430]:
+**Modules and crates are `snake_case`.** The rules originate in
+[RFC 430][rfc430] and are restated, as current official guidance, in
+[the Rust Style Guide][style-guide]:
 
 | Item                                | Convention                              |
 | ----------------------------------- | --------------------------------------- |
 | Crates                              | `snake_case` (but prefer a single word) |
 | Modules                             | `snake_case`                            |
 | Types, traits, enum variants        | `UpperCamelCase`                        |
+| Struct fields                       | `snake_case`                            |
 | Functions, methods, local variables | `snake_case`                            |
+| Macros                              | `snake_case`                            |
 | Statics and constants               | `SCREAMING_SNAKE_CASE`                  |
 | Type parameters                     | concise `UpperCamelCase`, usually `T`   |
 | Lifetimes                           | short and lowercase, `'a`               |
 
 Acronyms count as one word: `Uuid`, not `UUID`; `is_xid_start`, not `is_XID_start`.
+
+And one rule that is easy to get wrong, straight from the Style Guide: when the
+name you want is a reserved word, _"either use a raw identifier (`r#crate`) or
+use a trailing underscore (`crate_`). Don't misspell the word (`krate`)."_
 
 **Target names are kebab-case.** Package names on crates.io are conventionally
 hyphenated (`app-core`, `serde-json`… ) and so are the file names in `tests/`,
@@ -650,8 +658,13 @@ indentation" review comments come from.
 | `*.toml`                   | [taplo](https://taplo.tamasfe.dev/), optional | not used here                                                      |
 | line endings               | git                                           | [`.gitattributes`](.gitattributes)                                 |
 
-**Rust has no convention for any of this** and Cargo has no opinion, so the
-table above is a defensible default rather than a rule. Prettier is the
+Note the asymmetry. `.rs` is the one row with a real answer: rustfmt's defaults
+are [the Rust Style Guide][style-guide], an official Rust project document, which
+is why [`rustfmt.toml`](rustfmt.toml) here is a single line and why arguing with
+it is arguing with the language's own style.
+
+**For every other row Rust has no convention** and Cargo has no opinion, so the
+rest of the table is a defensible default rather than a rule. Prettier is the
 ecosystem-agnostic choice because most people already have it;
 [dprint](https://dprint.dev/) is faster and does handle TOML, at the cost of
 being far less widely installed.
@@ -771,7 +784,7 @@ one source of confusion.
 ├── Cargo.toml                     # virtual manifest: [workspace], no [package]
 ├── Cargo.lock                     # committed, deliberately
 ├── rust-toolchain.toml            # channel + rustfmt, clippy — the only version pin
-├── rustfmt.toml                   # two lines, and it should stay that way
+├── rustfmt.toml                   # one line — the defaults are the Style Guide
 ├── clippy.toml                    # thresholds only; lint selection is in Cargo.toml
 ├── deny.toml                      # cargo-deny: advisories, licences, bans, sources
 ├── .cargo/config.toml             # [alias] xtask = "run --package xtask --"
@@ -858,7 +871,10 @@ $ cargo doc --workspace --no-deps --open
 - [The Book, ch. 7: Managing Growing Projects][book-modules] — packages, crates, modules
 - [The Book, ch. 11.3: Test Organization][book-tests] — unit vs integration tests
 - [Edition Guide: Path clarity][paths] — `foo.rs` + `foo/` instead of `mod.rs`
-- [RFC 430: Finalizing naming conventions][rfc430] — casing rules
+- [The Rust Style Guide][style-guide] — the default style rustfmt implements,
+  plus naming conventions
+- [RFC 430: Finalizing naming conventions][rfc430] — where the casing rules
+  originate
 - [Rust API Guidelines][api-guidelines] — naming, interoperability, documentation
 
 ### Opinionated, well-reasoned — the source of most of Part 2
@@ -888,6 +904,7 @@ $ cargo doc --workspace --no-deps --open
 [book-modules]: https://doc.rust-lang.org/book/ch07-00-managing-growing-projects-with-packages-crates-and-modules.html
 [book-tests]: https://doc.rust-lang.org/book/ch11-03-test-organization.html
 [paths]: https://doc.rust-lang.org/edition-guide/rust-2018/path-changes.html
+[style-guide]: https://doc.rust-lang.org/style-guide/
 [rfc430]: https://rust-lang.github.io/rfcs/0430-finalizing-naming-conventions.html
 [api-guidelines]: https://rust-lang.github.io/api-guidelines/
 [api-naming]: https://rust-lang.github.io/api-guidelines/naming.html

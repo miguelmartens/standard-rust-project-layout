@@ -1,12 +1,37 @@
 # Deliberately almost empty.
 #
-# rustfmt's defaults ARE the Rust style guide. Every option added here is a
-# small, permanent tax on every reader who has internalised the default output.
-# `max_width` is the one setting worth having an opinion about, and even that
-# is arguable.
+# rustfmt's defaults ARE the Rust Style Guide, which is an official document of
+# the Rust project, not a community preference:
 #
-# Anything below this line requires nightly and does not belong in a repo that
-# claims to build on stable.
+#   "The Rust Style Guide defines the default Rust style, and recommends that
+#    developers and tools follow the default Rust style. Tools such as `rustfmt`
+#    use the style guide as a reference for the default style."
+#     -- https://doc.rust-lang.org/style-guide/
+#
+# So every option added here is two things at once: a small permanent tax on
+# every reader who has internalised the default output, and a claim that you know
+# better than the document rustfmt implements. Occasionally that claim is true.
+# It is worth making deliberately.
+#
+# NOTE WHAT IS NOT HERE.
+#
+# `max_width = 100` would be a no-op. 100 is rustfmt's default and the Style
+# Guide's own rule -- "The maximum width for a line is 100 characters" -- so
+# setting it buys nothing and costs every reader a moment working out whether it
+# differs from the default. Same for `tab_spaces = 4`. Restating a default does
+# not produce a minimal config; it produces a slightly larger one.
+#
+# Anything beyond this line requires nightly, and does not belong in a repository
+# that claims to build on stable.
 
+# The one line here that is not a no-op.
+#
+# `cargo fmt` passes the edition from Cargo.toml, so this changes nothing for the
+# normal path. It matters for a bare `rustfmt src/lib.rs` from a shell or an
+# editor integration, which defaults to edition 2015 and would otherwise format
+# this workspace under rules from 2015.
+#
+# `style_edition` -- the Style Guide's own versioning, so the default style can
+# improve without reformatting every existing repository -- follows `edition`
+# automatically, and needs no entry of its own.
 edition = "2024"
-max_width = 100
