@@ -29,6 +29,7 @@ _Inspired by [golang-standards/project-layout](https://github.com/golang-standar
   - [When _not_ to split into crates](#when-not-to-split-into-crates)
   - [Automation: `xtask`, not `make`](#automation-xtask-not-make)
   - [Formatting the files rustfmt does not touch](#formatting-the-files-rustfmt-does-not-touch)
+  - [Environment variables: commit `.env.example`, never `.env`](#environment-variables-commit-envexample-never-env)
   - [Directories the ecosystem has no convention for](#directories-the-ecosystem-has-no-convention-for)
 - [Anti-patterns](#anti-patterns)
 - [This repository](#this-repository)
@@ -693,6 +694,84 @@ and JSON-with-comments does not error — it parses as YAML, turns the comment i
 a key, ignores every option after it, and exits 0. Write the file as YAML (as
 here, so it can explain itself) or as strict JSON with no comments at all.
 
+## Environment variables: commit `.env.example`, never `.env`
+
+Cargo has no dotenv support, and neither does the standard library.
+`std::env::var` reads the environment the process was handed; nothing fills that
+environment from a file unless something in the program does it. Worth saying
+plainly, because a `.env` in a repository root looks self-evidently functional
+and is in fact inert.
+
+So the file is a convention about **documenting** configuration, and it is worth
+having for that alone. Three places a value can come from:
+
+| Source                                       | Committed  | What it is for                                                                                     |
+| -------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------- |
+| `.env`                                       | **never**  | Real local values, credentials included. Git-ignored, on every project, without exception.         |
+| [`.env.example`](.env.example)               | **always** | Every variable the code reads, with a default or an empty placeholder. This file is documentation. |
+| [`[env]` in `.cargo/config.toml`][cargo-env] | **always** | Non-secret values that only matter under Cargo — `cargo run`, `cargo test`, build scripts.         |
+
+The third row is the one people do not know about. Cargo can set environment
+variables itself, and for a non-secret development default it is a better answer
+than a dotfile that nothing reads.
+
+To make `.env` actually reach the process, add [`dotenvy`][dotenvy] — the
+maintained fork of the unmaintained `dotenv` — and call it on the first line of
+`main`, or stay outside the program with [`direnv`](https://direnv.net/) or
+`set -a; . ./.env; set +a`. This workspace does neither: it reads `std::env`
+directly and takes no dotenv dependency, the same choice made for `criterion`
+and `syn` elsewhere here.
+
+**The ignore rule needs a negation, and the negation has a trap.**
+
+```gitignore
+.env
+.env.*
+!.env.example
+```
+
+That works because the patterns match files. Git will not re-include a path
+inside an excluded _directory_ — `secrets/` followed by `!secrets/example.toml`
+matches nothing at all, and does it silently. And no ignore rule has any effect
+on a file that is already tracked: a `.env` committed once stays committed until
+`git rm --cached`, and stays in the history whatever you do next, so the fix is
+to rotate the values, not to delete the file.
+
+**Read the environment once, at the edge, and pass a value down.** In this
+repository [`app-core::Config`](crates/app-core/src/config.rs) derives
+`Deserialize` and never mentions `std::env`;
+[`app-cli`](crates/app-cli/src/cli/config.rs) does the reading and hands a
+`Config` to the domain. A library that reads the environment itself has an input
+its caller cannot see, cannot override, and cannot vary between two tests in the
+same process.
+
+That last point is now enforced by the language. **`std::env::set_var` is
+`unsafe` in edition 2024** — it mutates state another thread may be reading —
+so a unit test cannot arrange an environment in-process at all. Take the lookup
+as an argument (`impl Fn(&str) -> Option<OsString>`) and the parsing becomes a
+pure function you can test directly; use `Command::env` when you want the real
+thing end to end, because setting variables for a _child_ process is safe.
+
+**`env!` is not `std::env::var`.** `env!("APP_API_TOKEN")` reads the variable at
+_compile_ time and bakes the value into the binary: a build input, not runtime
+configuration. It makes the artefact environment-specific and the build
+irreproducible. Keep it for build metadata such as `CARGO_PKG_VERSION`.
+
+**Keep the example honest.** A variable the code reads and `.env.example` does
+not list is one the next person has no way to discover, and an example that
+lists variables nothing reads is the same lie as an empty `deploy/`. Prefix
+every name with the binary's (`APP_`), so `env | grep APP_` is a complete
+answer.
+
+**`.env` is not a secret store.** It is a plaintext file that gets copied to a
+laptop, picked up by a `COPY . .` in a Dockerfile, and included in a backup
+nobody encrypted. For local development that is an acceptable trade; in
+production the environment comes from the platform — systemd's
+`EnvironmentFile=`, a Kubernetes secret, your cloud's secret manager. The
+`detect-private-key` hook in
+[`.pre-commit-config.yaml`](.pre-commit-config.yaml) catches the most
+embarrassing version of getting this wrong.
+
 ## Directories the ecosystem has no convention for
 
 Everything below this line: **Rust has no convention, and neither does this
@@ -759,6 +838,12 @@ someone who cannot verify it and will be the one to see the panic. `thiserror`
 for libraries, `anyhow` for binaries. If an `unwrap` is genuinely provable, allow
 the lint narrowly and write the proof in the comment.
 
+**A committed `.env`.** Ignore it from the first commit, before there is
+anything in it worth stealing — the rule is cheap to add early and involves
+rotating credentials to add late, because deleting the file does not remove it
+from the history. Commit `.env.example` instead, and keep it in step with what
+the code actually reads.
+
 **Uncommitted `Cargo.lock`.** Non-reproducible CI, `git bisect` that does not
 bisect, and "works on my machine" that is technically accurate. Commit it, run CI
 with `--locked`, and get fresh-dependency coverage from a scheduled
@@ -795,6 +880,7 @@ one source of confusion.
 ├── .gitignore                     # note what is NOT ignored
 ├── .prettierrc                    # Markdown/YAML/JSON — what rustfmt misses
 ├── .prettierignore
+├── .env.example                   # the committed variable list; `.env` is ignored
 ├── Makefile                       # aliases for `cargo xtask` — no logic in it
 ├── AGENTS.md                      # the same rules, aimed at coding agents
 ├── README.md                      # you are here
@@ -813,6 +899,7 @@ one source of confusion.
 │   │   └── benches/order-total.rs
 │   ├── app-cli/                   #   binary `app`: parsing and wiring only
 │   │   ├── src/{main,cli}.rs
+│   │   ├── src/cli/config.rs      #   the environment, read once, at the edge
 │   │   └── tests/cli-args.rs
 │   └── app-macros/                #   proc-macro: the split the language forces
 ├── xtask/                         # automation in Rust, not Make
@@ -854,7 +941,10 @@ $ cargo doc --workspace --no-deps --open
    the workspace, and re-read [Part 1](#part-1--what-cargo-defines).
 3. If you have several, keep `crates/` and delete the example crates.
 4. Delete every directory you have nothing to put in.
-5. Replace `LICENSE` with real licence text and fix the `repository` and
+5. If your program reads the environment, keep `.env.example` and the three
+   `.gitignore` lines that go with it, and replace the variables with yours. If
+   it does not, delete both.
+6. Replace `LICENSE` with real licence text and fix the `repository` and
    `authors` fields.
 
 ---
@@ -866,6 +956,7 @@ $ cargo doc --workspace --no-deps --open
 - [The Cargo Book: Package Layout][cargo-layout] — the canonical layout
 - [The Cargo Book: Cargo Targets][cargo-targets] — target auto-discovery
 - [The Cargo Book: Workspaces][cargo-workspaces] — virtual manifests, inheritance
+- [The Cargo Book: Configuration — `[env]`][cargo-env] — environment variables Cargo sets itself
 - [The Cargo Book: The Manifest Format][manifest] — `[lints]`, `priority`, `rust-version`
 - [The Cargo Book: Profiles][profiles] — `lto`, `codegen-units`, `strip`, `debug`
 - [The Cargo Book: FAQ — why have `Cargo.lock` in version control][faq-lock]
@@ -899,6 +990,7 @@ $ cargo doc --workspace --no-deps --open
 [cargo-layout]: https://doc.rust-lang.org/cargo/guide/project-layout.html
 [cargo-targets]: https://doc.rust-lang.org/cargo/reference/cargo-targets.html
 [cargo-workspaces]: https://doc.rust-lang.org/cargo/reference/workspaces.html
+[cargo-env]: https://doc.rust-lang.org/cargo/reference/config.html#env
 [manifest]: https://doc.rust-lang.org/cargo/reference/manifest.html
 [profiles]: https://doc.rust-lang.org/cargo/reference/profiles.html
 [faq-lock]: https://doc.rust-lang.org/cargo/faq.html#why-have-cargolock-in-version-control
@@ -915,6 +1007,7 @@ $ cargo doc --workspace --no-deps --open
 [thiserror]: https://docs.rs/thiserror
 [anyhow]: https://docs.rs/anyhow
 [cargo-deny]: https://embarkstudios.github.io/cargo-deny/
+[dotenvy]: https://docs.rs/dotenvy
 [adr-index]: https://github.com/architecture-decision-record/architecture-decision-record
 
 ---
