@@ -67,6 +67,12 @@ are absent. Do not add them as hard requirements. `rustup` is the only one.
 - **The `Makefile` contains no automation.** Every recipe is one line forwarding
   to `cargo xtask` or `cargo`. If a recipe needs a second line, it belongs in
   `xtask`.
+- **`.env` is never committed, and `.env.example` is not decoration.** It is the
+  documented list of every variable the code reads. Add a variable to
+  `crates/app-cli/src/cli/config.rs` and you add it there in the same commit;
+  the `.gitignore` negation (`.env`, `.env.*`, `!.env.example`) is what keeps
+  the example visible. Configuration is read once in the binary and passed down
+  as a value — never `std::env` in `app-core`.
 - **`Cargo.lock` is committed** and CI runs `--locked`. Stage lockfile changes in
   the same commit as the manifest change that caused them.
 - **YAML files use `.yaml`.** The single exception is `.github/dependabot.yml`,
@@ -95,15 +101,16 @@ are absent. Do not add them as hard requirements. `rustup` is the only one.
 
 ## Deliberate oddities — do not "fix" these
 
-| Looks wrong                                                                          | Why it is that way                                                          |
-| ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
-| `benches/order-total.rs` hand-rolls a timing loop with `harness = false`             | The repo has no benchmarking dependency on purpose. Do not add criterion.   |
-| `app-cli` has no lib target and its tests spawn the binary                           | That is the teaching point about binaries, not an oversight.                |
-| `app-macros` uses raw `proc_macro`, no `syn`/`quote`                                 | Keeps the dependency tree honest. The docs say real macros should use them. |
-| `tests/order-lifecycle.rs` contains commented-out assertions marked DOES NOT COMPILE | Deliberate: it demonstrates what an integration test cannot reach.          |
-| `docs/adr/0000-template.md` is not a decision                                        | `0000` is reserved for the template. There is no ADR 0000.                  |
-| ADRs are never edited                                                                | A changed decision gets a new ADR that supersedes the old one.              |
-| `deny.toml` allows licences nothing uses                                             | An allow-list is a set of licences we accept, not an inventory.             |
+| Looks wrong                                                                          | Why it is that way                                                                                               |
+| ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `benches/order-total.rs` hand-rolls a timing loop with `harness = false`             | The repo has no benchmarking dependency on purpose. Do not add criterion.                                        |
+| `app-cli` has no lib target and its tests spawn the binary                           | That is the teaching point about binaries, not an oversight.                                                     |
+| `app-macros` uses raw `proc_macro`, no `syn`/`quote`                                 | Keeps the dependency tree honest. The docs say real macros should use them.                                      |
+| `tests/order-lifecycle.rs` contains commented-out assertions marked DOES NOT COMPILE | Deliberate: it demonstrates what an integration test cannot reach.                                               |
+| `docs/adr/0000-template.md` is not a decision                                        | `0000` is reserved for the template. There is no ADR 0000.                                                       |
+| ADRs are never edited                                                                | A changed decision gets a new ADR that supersedes the old one.                                                   |
+| `deny.toml` allows licences nothing uses                                             | An allow-list is a set of licences we accept, not an inventory.                                                  |
+| `.env.example` exists but nothing loads `.env`                                       | No dotenv dependency on purpose. `app-cli` reads `std::env`; the README says to add `dotenvy` in a real project. |
 
 ## Before reporting done
 

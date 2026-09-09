@@ -16,6 +16,8 @@
 //! reachable from outside, so a bare `pub` is always a lie and the lint says
 //! so. `pub(crate)` states the actual intent.
 
+mod config;
+
 use anyhow::{Context, Result, bail};
 use app_core::{Config, CustomerId, Order, OrderId, OrderLine};
 use clap::{Parser, Subcommand};
@@ -42,7 +44,7 @@ enum Command {
         #[arg(long = "line", value_name = "SKU:QTY:CENTS", required = true)]
         lines: Vec<String>,
     },
-    /// Print the effective configuration.
+    /// Print the effective configuration, after environment overrides.
     Config,
 }
 
@@ -51,10 +53,14 @@ impl Cli {
     ///
     /// # Errors
     ///
-    /// Returns any failure from argument interpretation or from `app-core`,
-    /// with enough context attached to be actionable on stderr.
+    /// Returns any failure from argument interpretation, from the environment,
+    /// or from `app-core`, with enough context attached to be actionable on
+    /// stderr.
     pub(crate) fn run(self) -> Result<()> {
-        let config = Config::default();
+        // Read once, here, and pass a value down. Nothing below this line and
+        // nothing in `app-core` touches `std::env`, which is what keeps the
+        // rules testable without a process. See `cli/config.rs`.
+        let config = config::from_env()?;
 
         match self.command {
             Command::Total { lines } => total(&lines, &config),

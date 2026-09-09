@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `.env.example`, the `.gitignore` rules that keep `.env` out and the example
+  in, and a README section on where configuration comes from.
+- `app-cli` reads `APP_CURRENCY` and `APP_MAX_ORDER_LINES` from the environment.
+  `app-core` still never touches `std::env`: the binary loads a `Config` once
+  and passes it down.
+
 ## [0.1.0] — 2026-09-03
 
 ### Added

@@ -19,8 +19,26 @@
 use std::process::{Command, Output};
 
 fn run(args: &[&str]) -> Output {
+    run_with_env(args, &[])
+}
+
+/// Runs the binary with every `APP_*` variable cleared, then `env` applied.
+///
+/// Clearing matters: without it these tests pass or fail depending on what the
+/// contributor happens to have exported, which is the classic environment-
+/// dependent test suite.
+///
+/// Note also what makes this possible at all. Setting a variable for a *child*
+/// process is safe, so a test can drive the real loader end to end here.
+/// Setting one in-process with `std::env::set_var` is `unsafe` in edition 2024
+/// and forbidden by the workspace lints, which is why `src/cli/config.rs` takes
+/// its lookup as an argument instead.
+fn run_with_env(args: &[&str], env: &[(&str, &str)]) -> Output {
     Command::new(env!("CARGO_BIN_EXE_app"))
         .args(args)
+        .env_remove("APP_CURRENCY")
+        .env_remove("APP_MAX_ORDER_LINES")
+        .envs(env.iter().copied())
         .output()
         .expect("failed to run the `app` binary")
 }
@@ -44,6 +62,30 @@ fn config_prints_the_defaults() {
     assert!(
         stdout.contains("max_order_lines: 100"),
         "stdout was: {stdout}"
+    );
+}
+
+#[test]
+fn the_environment_overrides_the_defaults() {
+    let output = run_with_env(
+        &["total", "--line", "widget:1:1000"],
+        &[("APP_CURRENCY", "GBP")],
+    );
+
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(stdout.contains("GBP 10.00"), "stdout was: {stdout}");
+}
+
+#[test]
+fn an_unparseable_environment_variable_is_rejected_by_name() {
+    let output = run_with_env(&["config"], &[("APP_MAX_ORDER_LINES", "lots")]);
+
+    assert!(!output.status.success());
+    let stderr = String::from_utf8(output.stderr).unwrap();
+    assert!(
+        stderr.contains("APP_MAX_ORDER_LINES"),
+        "stderr was: {stderr}"
     );
 }
 

@@ -35,7 +35,25 @@ way out is stdout, stderr and an exit code. Compare that to the unit tests in
 `app-core`, which run in microseconds and can assert on private state.
 
 So: `main.rs` is four lines, [`cli.rs`](src/cli.rs) turns strings into domain
-types, and every rule lives in `app-core`.
+types, [`cli/config.rs`](src/cli/config.rs) turns the environment into a
+`Config`, and every rule lives in `app-core`.
+
+## Configuration is read here, once
+
+`app_core::Config` is the shape; reading it is this crate's job, because a
+library that reads `std::env` has an input its caller cannot see or override.
+[`src/cli/config.rs`](src/cli/config.rs) reads `APP_CURRENCY` and
+`APP_MAX_ORDER_LINES`, and `Cli::run` passes the resulting `Config` down.
+[`.env.example`](../../.env.example) is the documented list of variables —
+nothing loads a `.env` for you, which the root README explains under
+"Environment variables".
+
+Note the loader takes its lookup as an argument instead of calling
+`std::env::var` inline. `std::env::set_var` is `unsafe` in edition 2024, so a
+unit test cannot arrange an environment in-process at all; passing the lookup in
+makes the parsing and the error messages a pure function, and
+[`tests/cli-args.rs`](tests/cli-args.rs) still covers the real thing by setting
+variables on the child process.
 
 ## `anyhow`, not `thiserror`
 

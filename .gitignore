@@ -14,3 +14,17 @@
 # It is committed for binaries and libraries alike -- see the README section
 # "Commit Cargo.lock". If you copy this file into a library and add an ignore
 # rule for Cargo.lock, you are giving up reproducible CI for nothing.
+
+# Local environment values -- see the README section "Environment variables".
+# `.env.example` is the committed template and has to survive the rule above it,
+# which is what the negation is for.
+#
+# Two things about that negation. It works only because these patterns match
+# files: git will not re-include a path inside an excluded *directory*, so
+# `secrets/` followed by `!secrets/example.toml` silently does nothing. And
+# neither rule affects a file that is already tracked -- if a `.env` has ever
+# been committed, `git rm --cached .env` and rotate whatever was in it, because
+# it is still in the history either way.
+.env
+.env.*
+!.env.example
