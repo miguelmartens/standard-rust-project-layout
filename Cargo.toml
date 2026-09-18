@@ -29,9 +29,10 @@ members = [
 version = "0.1.0"
 # M-LATEST-EDITION: new crates target the latest stable edition.
 edition = "2024"
-# M-MSRV: pin an MSRV from day one, a few releases behind stable.
-# 1.85 is the floor for edition 2024, so it is the earliest honest value here.
-rust-version = "1.85"
+# M-MSRV: pin an MSRV from day one. This repository tracks the current stable
+# series rather than trailing it, because the example is the point here; a crate
+# with downstream users should stay a few releases behind stable instead.
+rust-version = "1.98.1"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/example/rust-project-layout"
 authors = ["The rust-project-layout authors"]

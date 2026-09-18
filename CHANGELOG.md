@@ -15,6 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `app-core` still never touches `std::env`: the binary loads a `Config` once
   and passes it down.
 
+### Changed
+
+- MSRV raised from 1.85 to 1.98.1. A minor bump per _M-MSRV_, hence it lands
+  before 0.2.0 rather than waiting for 1.0.
+- Dependency updates moved from Dependabot to Renovate: same weekly cadence,
+  routine bumps grouped into one pull request.
+
 ## [0.1.0] — 2026-09-03
 
 ### Added
