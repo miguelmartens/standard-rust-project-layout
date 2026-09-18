@@ -30,7 +30,7 @@ cargo commands are not sufficient — in particular `cargo test --all-targets` d
 Also verify when relevant:
 
 ```console
-cargo +1.85 check --workspace --all-targets --locked   # the declared MSRV
+cargo +1.98.1 check --workspace --all-targets --locked   # the declared MSRV
 cargo deny check                                       # licences, advisories
 ```
 
@@ -75,8 +75,8 @@ are absent. Do not add them as hard requirements. `rustup` is the only one.
   as a value — never `std::env` in `app-core`.
 - **`Cargo.lock` is committed** and CI runs `--locked`. Stage lockfile changes in
   the same commit as the manifest change that caused them.
-- **YAML files use `.yaml`.** The single exception is `.github/dependabot.yml`,
-  because GitHub documents that exact name and a misnamed config fails silently.
+- **YAML files use `.yaml`.** GitHub workflow files accept either extension;
+  everything here says `.yaml`.
 - **Every directory that teaches something has a `README.md`.** Source trees do
   not — module docs do that job. Do not put a `README.md` inside `src/`.
 - **Do not add a crate or a dependency** without a reason from
@@ -116,7 +116,7 @@ are absent. Do not add them as hard requirements. `rustup` is the only one.
 
 1. `cargo xtask ci` passes.
 2. If you changed a manifest, the declared MSRV still builds:
-   `cargo +1.85 check --workspace --all-targets --locked`.
+   `cargo +1.98.1 check --workspace --all-targets --locked`.
 3. If you changed prose, relative links and README anchors still resolve, and the
    repository tree in the README still lists every root file.
 4. If you changed behaviour, the README says what the code now does.

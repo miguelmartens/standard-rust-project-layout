@@ -428,7 +428,7 @@ Three tables in the root manifest, one line per crate to opt in.
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.98.1"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/example/rust-project-layout"
 
@@ -528,8 +528,12 @@ release.
 ```toml
 [workspace.package]
 edition = "2024"
-rust-version = "1.85"   # the floor for edition 2024
+rust-version = "1.98.1"   # current stable
 ```
+
+This repository tracks current stable in its own example, so the value does not
+rot between releases. A crate with downstream users should trail stable by a few
+releases instead, as _M-MSRV_ advises.
 
 **Bumping the MSRV is a _minor_ version bump, not a major one.** This surprises
 people. The reasoning in _M-MSRV_ is that ecosystem projects already depend on
@@ -881,6 +885,7 @@ one source of confusion.
 ├── .prettierrc                    # Markdown/YAML/JSON — what rustfmt misses
 ├── .prettierignore
 ├── .env.example                   # the committed variable list; `.env` is ignored
+├── renovate.json                  # dependency updates: weekly, routine bumps grouped
 ├── Makefile                       # aliases for `cargo xtask` — no logic in it
 ├── AGENTS.md                      # the same rules, aimed at coding agents
 ├── README.md                      # you are here
@@ -888,8 +893,7 @@ one source of confusion.
 ├── CHANGELOG.md
 ├── LICENSE                        # placeholder: the MIT OR Apache-2.0 convention
 ├── .github/
-│   ├── workflows/ci.yaml          # check · msrv · deny
-│   └── dependabot.yml
+│   └── workflows/ci.yaml          # check · msrv · deny
 ├── crates/                        # every crate, flat siblings
 │   ├── app-core/                  #   library: domain logic, no I/O
 │   │   ├── src/{lib,error,config,domain}.rs
